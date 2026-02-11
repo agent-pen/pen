@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+set -o nounset -o errexit -o pipefail
+
+script_path="${BASH_SOURCE[0]}"
+[[ -L "$script_path" ]] && script_path="$(readlink "$script_path")"
+export PEN_HOME="$(cd -- "$(dirname -- "$script_path")" && pwd)"
+export PEN_PROJECT="$(pwd)"
+
+cmd_path="${PEN_HOME}/penctl/commands"
+
+while [[ $# -gt 0 ]]; do
+  if [[ -f "${cmd_path}/${1}.sh" ]]; then
+    cmd_path="${cmd_path}/${1}.sh"
+    shift
+    break
+  elif [[ -d "${cmd_path}/${1}" && "$1" != "lib" ]]; then
+    cmd_path="${cmd_path}/${1}"
+    shift
+  else
+    echo "Unknown command: $1" >&2
+    exit 1
+  fi
+done
+
+if [[ -d "$cmd_path" ]]; then
+  echo "Usage: pen <command>" >&2
+  echo "" >&2
+  echo "Commands:" >&2
+  for f in "${cmd_path}"/*.sh; do
+    [[ -f "$f" ]] || continue
+    echo "  $(basename "$f" .sh)" >&2
+  done
+  for d in "${cmd_path}"/*/; do
+    [[ -d "$d" ]] || continue
+    [[ "$(basename "$d")" == "lib" ]] && continue
+    echo "  $(basename "$d")" >&2
+  done
+  exit 1
+fi
+
+exec bash "$cmd_path" "$@"
