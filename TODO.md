@@ -27,7 +27,6 @@
 | # | Item | Notes |
 |---|------|-------|
 | 1 | Pen config file (JSON) | Containing allowed HTTP and network allowlists, plus other config like Dockerfile override |
-| 2 | `.pen` directory layout | `.pen` is gitignored and contains only runtime artifacts (PID files, logs). Pen config lives in the project root (whether separate files like `http-allowlist.txt` or a single `pen.json` config file) |
 | 3 | Configurable volume mounts | Always delete container on stop/restart but retain useful data (e.g. docker volumes) and mount in useful config (e.g. git config) |
 | 4 | Configure CPU and memory limits | Set CPU and memory limits for the container |
 

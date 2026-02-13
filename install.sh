@@ -16,4 +16,6 @@ echo "$sudoers_line" | sudo tee "$SUDOERS_FILE" > /dev/null
 sudo chmod 440 "$SUDOERS_FILE"
 sudo visudo -cf "$SUDOERS_FILE" > /dev/null 2>&1
 
+mkdir -p "${HOME}/.pen/sandboxes"
+
 echo "Installation succeeded."

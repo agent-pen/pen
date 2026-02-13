@@ -54,7 +54,7 @@ pf_rules="pass in quick on ${bridge_iface} from ${container_ip} to ${subnet}
 pass in quick on ${bridge_iface} proto { tcp udp } from ${container_ip} to ${dns_host} port 53
 pass in quick on ${bridge_iface} proto tcp from ${container_ip} to ${proxy_host} port ${proxy_port}"
 
-allowed_ips_file="${PEN_PROJECT}/.pen/network-allowlist.txt"
+allowed_ips_file="${sandbox_config_dir}/network-allowlist.txt"
 if [[ -f "$allowed_ips_file" ]]; then
   while IFS= read -r line; do
     line="${line%%#*}"
@@ -75,6 +75,7 @@ echo "$pf_rules" | sudo "$pfctl_wrapper" load "$pf_anchor"
 # --- 5. Start proxy in background ---
 
 
+export PEN_ALLOWLIST_PATH="${sandbox_config_dir}/http-allowlist.txt"
 script -qF "$proxy_log_file" \
   mitmdump --mode regular --listen-host "${proxy_host}" --listen-port "${proxy_port}" \
   --set connection_strategy=lazy \

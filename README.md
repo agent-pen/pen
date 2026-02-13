@@ -40,12 +40,12 @@ From your project directory:
 pen init
 ```
 
-This creates a `.pen/` directory containing two allowlist config files:
+This creates egress allowlist config files in `~/.pen/sandboxes/<sandbox-id>/`:
 
 - `http-allowlist.txt` — hostname:port pairs for HTTP/HTTPS traffic (e.g. `registry.npmjs.org:443`)
 - `network-allowlist.txt` — ip:port pairs for non-HTTP protocols (e.g. raw TCP/SSH)
 
-Edit these files to control what the sandbox can access. Both are default-deny: only listed entries are allowed through.
+These files are stored outside the project directory so they cannot be modified from inside the sandbox. Edit them on the host to control what the sandbox can access. Both are default-deny: only listed entries are allowed through.
 
 ### Build the container image
 
@@ -83,7 +83,7 @@ pen proxy logs        # Tail the HTTP proxy log
 
 ### SSH / git
 
-SSH is automatically configured inside the sandbox to tunnel through the HTTP proxy. To allow git operations over SSH, add the git host to `http-allowlist.txt`:
+SSH is automatically configured inside the sandbox to tunnel through the HTTP proxy. To allow git operations over SSH, add the git host to `~/.pen/sandboxes/<sandbox-id>/http-allowlist.txt`:
 
 ```
 github.com:22

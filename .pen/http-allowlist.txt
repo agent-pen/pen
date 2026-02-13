@@ -1,3 +1,0 @@
-api.anthropic.com:443
-platform.claude.com:443
-raw.githubusercontent.com:443

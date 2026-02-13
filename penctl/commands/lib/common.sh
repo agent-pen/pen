@@ -9,6 +9,7 @@ proxy_pid_file="${PEN_PROJECT}/.pen/proxy.pid"
 proxy_log_file="${PEN_PROJECT}/.pen/proxy.log"
 pfctl_wrapper="${PEN_HOME}/penctl/commands/lib/pfctl-wrapper.sh"
 pf_anchor="com.apple/${container_name}"
+sandbox_config_dir="${HOME}/.pen/sandboxes/${container_name}"
 
 pen_is_running() {
   container inspect "$target" 2>/dev/null | jq -e '.[0].status == "running"' >/dev/null 2>&1

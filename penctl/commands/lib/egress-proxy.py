@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from mitmproxy import http, tls, ctx
 
-ALLOWED_HOSTS_PATH = Path(os.environ["PEN_PROJECT"]) / ".pen" / "http-allowlist.txt"
+ALLOWED_HOSTS_PATH = Path(os.environ["PEN_ALLOWLIST_PATH"])
 
 def load_allowed_hosts(path: Path) -> set[tuple[str, int]]:
     allowed = set()
