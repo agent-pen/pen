@@ -51,3 +51,5 @@
 |---|------|-------|
 | 1 | Decompose `start.sh` | Split into separate concerns in separate scripts or functions |
 | 2 | Reduce duplication across scripts | Reduce duplication across `install.sh`, `uninstall.sh`, and other scripts |
+| 3 | Collapse `./penctl` into project root | Move contents of `penctl/` to the project root to flatten the directory structure |
+| 4 | Evaluate removing `request()` from egress proxy | Determine whether `request()` can be removed from `penctl/commands/lib/egress-proxy.py` |
