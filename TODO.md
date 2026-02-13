@@ -21,13 +21,19 @@
 | 6 | SSH config setup should append, not clobber | `pen start` SSH config setup should append the ProxyCommand directive instead of clobbering `~/.ssh/config` inside the container. Merge the `Host *` ProxyCommand block if file already exists |
 | 7 | Investigate Apple Container DNS vs CloudFlare WARP conflict | Previously both tried to bind to port 53, blocking each other. If resolved, document what fixed it |
 | 8 | Open SSH from host to sandbox | Support connecting IDE GUI on host to IDE server running in the sandbox |
+| 9 | Fail `start.sh` if proxy cannot start | Detect proxy startup failure (e.g. port collision) and fail `start.sh` early instead of continuing with a broken proxy |
+| 10 | Avoid proxy log growing indefinitely | Drop old log lines to prevent unbounded growth of the proxy log file |
+| 11 | Improve blocked-request response from HTTP proxy | Return a more appropriate response body and status code when the HTTP proxy blocks a request |
+| 12 | Show TCP/UDP activity in `pen proxy logs` | Currently only shows HTTP proxy activity. Investigate tunnelling all traffic via HTTP proxy using HTTP CONNECT so TCP/UDP activity is also visible |
+| 13 | More appropriate default allowlists | Review and improve the default HTTP and network allowlists shipped with pen |
 
 ## Configuration
 
 | # | Item | Notes |
 |---|------|-------|
 | 1 | Pen config file (JSON) | Containing allowed HTTP and network allowlists, plus other config like Dockerfile override |
-| 3 | Configurable volume mounts | Always delete container on stop/restart but retain useful data (e.g. docker volumes) and mount in useful config (e.g. git config) |
+| 2 | Configurable environment variables | Allow setting arbitrary env vars in the sandbox. Enables use cases like setting `SSL_CERT_FILE` to point to a custom certificate for corporate proxy TLS termination |
+| 3 | Configurable volume mounts | Always delete container on stop/restart but retain useful data (e.g. docker volumes) and mount in useful config (e.g. git config). Support both host-bound and non-host-bound volumes. Examples: exposing coding agent system-wide config, caching coding agent API keys / credentials |
 | 4 | Configure CPU and memory limits | Set CPU and memory limits for the container |
 
 ## CLI
@@ -36,6 +42,17 @@
 |---|------|-------|
 | 1 | Shell completion | `pen completion` prints shell commands for `.bashrc` or `.zshrc` to add `pen` shell completion |
 | 2 | Report container resource stats | Display CPU, memory, and other resource usage for the running sandbox |
+| 3 | `pen proxy logs`: hide successful traffic by default | Only show rejected traffic and errors by default; successful/allowed traffic should be hidden unless verbose mode is enabled |
+| 4 | `pen config apply` | Copy project-sited config (allowlists etc.) from `.pen/` in the project repo to the live config in `$HOME/.pen/sandboxes/<sandbox-id>/`. Warning: opens a potential security hole if an agent modifies the project-sited config and it is subsequently applied to `$HOME/.pen/...`. User should review config before applying. Useful for letting teams check in project-specific allowlists without letting the agent change the live config from inside the sandbox |
+| 5 | `pen config backup` | Pull live config from `$HOME/.pen/sandboxes/<sandbox-id>/` back into `.pen/` in the project repo, so it can be checked into version control |
+| 6 | Git-ignore only runtime artifacts in `.pen/` | `.pen/` now stores both checked-in config (allowlists) and runtime artifacts. Only git-ignore log and PID files, not the entire `.pen/` directory |
+
+## Documentation
+
+| # | Item | Notes |
+|---|------|-------|
+| 1 | Recipes docs | Add a "recipes" section documenting common workflows, including how to inject AWS credentials for an AWS SSO profile |
+| 2 | Agent sandbox awareness files | Provide `CLAUDE.md` and `AGENTS.md` files in the directory hierarchy that inform coding agents (e.g. Claude, Codex) they are running in a sandboxed environment with network egress controls |
 
 ## Testing
 
