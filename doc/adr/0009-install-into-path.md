@@ -4,7 +4,7 @@ Date: 2026-02-12
 
 ## Status
 
-Accepted
+Superceded by [20. Install into per-user path](0020-install-into-per-user-path.md)
 
 ## Context
 
