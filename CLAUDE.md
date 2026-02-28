@@ -24,5 +24,5 @@ There are no tests, linters, or build steps for pen itself.
 
 - All scripts use `set -o nounset -o errexit -o pipefail`.
 - Uses Apple's `container` CLI (not `docker`) for VM operations.
-- Architecture decisions are recorded as ADRs in `doc/adr/` managed with the [`adr` CLI tool](https://github.com/npryce/adr-tools).
+- Architecture decisions are recorded as ADRs in `doc/adr/` managed with the [`adr` CLI tool](https://github.com/npryce/adr-tools). Create new ADRs with `adr new "Title"`. To supersede an existing ADR: `adr new -s <number> "Title"`.
 - Per-project egress config (allowlists) lives in `$HOME/.pen/sandboxes/<container-name>/`. Runtime artifacts (PID, logs) live in `.pen/` within the user's project directory.
