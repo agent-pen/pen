@@ -55,13 +55,13 @@ pen build
 
 Uses the default Dockerfile. To customize, place a `Dockerfile` in `.pen/` and it will be used instead.
 
-### Start the sandbox
+### Open a shell in the sandbox
 
 ```bash
-pen start
+pen shell
 ```
 
-This creates an isolated VM with network restrictions. Your project directory is mounted at the same path inside the sandbox. Use `pen shell` to open an interactive shell.
+This starts the sandbox (if not already running) and drops you into an interactive shell. Your project directory is mounted at the same path inside the sandbox.
 
 ### Stop the sandbox
 
@@ -74,9 +74,9 @@ Tears down the VM, proxy, and firewall rules. The sandbox is ephemeral: all data
 ### Other commands
 
 ```bash
+pen start             # Start the sandbox without opening a shell
 pen restart           # Stop and start
 pen status            # Check if the sandbox is running
-pen shell             # Open a shell (starts sandbox if needed)
 pen exec <cmd>        # Run a command (starts sandbox if needed)
 pen proxy logs        # Tail the HTTP proxy log
 ```
