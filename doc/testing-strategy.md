@@ -252,9 +252,20 @@ Note: build tests are slow (Docker Hub pull). Use a minimal test Dockerfile from
 
 ## Open questions
 
-### OQ-1: Does the Container apiserver start under `launchctl asuser`?
+### OQ-1: Does the Container apiserver start under `launchctl asuser`? — RESOLVED
 
-If `sudo launchctl asuser <uid> sudo -u $TEST_USER container list` fails with a connection error, the apiserver did not auto-start. Fall back to SSH (Option B). This must be tested experimentally before committing to an execution mechanism.
+**Yes.** Validated experimentally. The full working chain is:
+
+```bash
+TEST_UID=$(id -u "$TEST_USER")
+launchctl asuser "$TEST_UID" sudo -u "$TEST_USER" container system start --enable-kernel-install
+launchctl asuser "$TEST_UID" sudo -u "$TEST_USER" container list
+```
+
+Caveats discovered during validation:
+- `sysadminctl -addUser -createHomeDirectory` does not actually create the home directory. Use `createhomedir -c -u "$TEST_USER"` after user creation.
+- `container system start` requires `--enable-kernel-install` to skip an interactive kernel download prompt. To avoid the ~450MB kernel download on every run, copy the kernel from the invoking user's `~/Library/Application Support/com.apple.container/kernels/` to the test user's equivalent directory before starting the service.
+- macOS may show a TCC "administer your computer" prompt when `sysadminctl` creates/deletes users from a terminal app. This appears intermittently (possibly related to script content changes). Clicking "Don't Allow" still allows the test to pass (with a `-14120` error logged). On headless CI runners this prompt does not appear.
 
 ### OQ-2: Does the test user need specific macOS groups?
 
