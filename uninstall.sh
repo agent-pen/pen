@@ -2,7 +2,7 @@
 
 set -o nounset -o errexit -o pipefail
 
-sudo rm -f /etc/sudoers.d/pen
-sudo rm -f /usr/local/bin/pen
+sudo rm -f "/etc/sudoers.d/pen-$(whoami)"
+rm -f "${HOME}/.local/bin/pen"
 
 echo "Uninstall complete."
