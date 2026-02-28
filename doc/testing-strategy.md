@@ -71,28 +71,14 @@ sudo sysadminctl -addUser "$TEST_USER" \
 
 ### Setup (run by the primary user with sudo)
 
-The test user does not need to be an admin. The primary user pre-stages just enough for `install.sh` to run unmodified:
+The test user does not need to be an admin. `install.sh` and `uninstall.sh` require `sudo` and use `$SUDO_USER` internally to resolve the real user, so the test harness runs them via `sudo` on behalf of the test user.
 
 1. Clone pen into the test user's home:
    ```bash
    sudo -u "$TEST_USER" git clone --local "$(pwd)" "/Users/$TEST_USER/pen"
    ```
 
-2. Grant the test user passwordless sudo for the commands `install.sh` needs:
-   ```bash
-   cat <<SUDOERS | sudo tee "/etc/sudoers.d/pen-e2e-test-user-setup" > /dev/null
-   $TEST_USER ALL=(root) NOPASSWD: /usr/sbin/chown root\:wheel *
-   $TEST_USER ALL=(root) NOPASSWD: /bin/chmod 755 *
-   $TEST_USER ALL=(root) NOPASSWD: /bin/chmod 440 *
-   $TEST_USER ALL=(root) NOPASSWD: /usr/bin/tee /etc/sudoers.d/pen-*
-   $TEST_USER ALL=(root) NOPASSWD: /usr/sbin/visudo -cf /etc/sudoers.d/pen-*
-   $TEST_USER ALL=(root) NOPASSWD: /bin/rm -f /etc/sudoers.d/pen-*
-   SUDOERS
-   sudo chmod 440 "/etc/sudoers.d/pen-e2e-test-user-setup"
-   sudo visudo -cf "/etc/sudoers.d/pen-e2e-test-user-setup"
-   ```
-
-3. Ensure `~/.local/bin` is on the test user's PATH:
+2. Ensure `~/.local/bin` is on the test user's PATH:
    ```bash
    sudo -u "$TEST_USER" bash -c '
      mkdir -p ~/.local/bin
@@ -100,9 +86,9 @@ The test user does not need to be an admin. The primary user pre-stages just eno
    '
    ```
 
-4. Run `install.sh` as the test user (exercises the full install path):
+3. Run `install.sh` as the test user (exercises the full install path):
    ```bash
-   run_as_test_user bash -c "cd ~/pen && ./install.sh"
+   sudo SUDO_USER="$TEST_USER" bash -c "cd /Users/$TEST_USER/pen && ./install.sh"
    ```
 
 ### Teardown
@@ -110,7 +96,6 @@ The test user does not need to be an admin. The primary user pre-stages just eno
 ```bash
 # Clean up any running pen sandboxes under the test user first
 sudo rm -f "/etc/sudoers.d/pen-$TEST_USER"
-sudo rm -f "/etc/sudoers.d/pen-e2e-test-user-setup"
 sudo sysadminctl -deleteUser "$TEST_USER" -secure
 ```
 

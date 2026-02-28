@@ -19,15 +19,15 @@ brew install --cask mitmproxy
 ```bash
 git clone https://github.com/agent-pen/pen.git
 cd pen
-./install.sh
+sudo ./install.sh
 ```
 
-This symlinks `pen` into `~/.local/bin` and configures passwordless sudo for firewall management. You will be prompted for your password once. Ensure `~/.local/bin` is on your PATH.
+This symlinks `pen` into `~/.local/bin` and configures passwordless sudo for firewall management. Ensure `~/.local/bin` is on your PATH.
 
 ## Removal
 
 ```bash
-./uninstall.sh
+sudo ./uninstall.sh
 ```
 
 ## Usage
