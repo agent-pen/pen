@@ -10,7 +10,7 @@ Nested *Linux* VMs inside a macOS VM are supported (M3+ with `container run --vi
 
 ## Chosen approach: second macOS user
 
-Run e2e tests under a temporary macOS user (`pen-test`) on the same host machine. This provides:
+Run e2e tests under a dedicated macOS user (`pen-e2e-test-user`) on the same host machine. This provides:
 
 - **Full isolation** from the developer's pen installation, containers, images, and networks.
 - **Real host primitives** — pf, Virtualization Framework, and mitmdump all work normally.
@@ -59,8 +59,8 @@ pen currently installs two system-wide resources that prevent two users from hav
 ### Create
 
 ```bash
-TEST_USER="pen-test"
-TEST_PASSWORD="pen-test-$(openssl rand -hex 8)"
+TEST_USER="pen-e2e-test-user"
+TEST_PASSWORD="$(openssl rand -hex 16)"
 
 sudo sysadminctl -addUser "$TEST_USER" \
   -fullName "pen test user" \
@@ -71,33 +71,38 @@ sudo sysadminctl -addUser "$TEST_USER" \
 
 ### Setup (run by the primary user with sudo)
 
-The test user does not need to be an admin. Privileged setup is pre-staged by the primary user:
+The test user does not need to be an admin. The primary user pre-stages just enough for `install.sh` to run unmodified:
 
 1. Clone pen into the test user's home:
    ```bash
    sudo -u "$TEST_USER" git clone --local "$(pwd)" "/Users/$TEST_USER/pen"
    ```
 
-2. Set root:wheel on the test user's pfctl-wrapper:
+2. Grant the test user passwordless sudo for the commands `install.sh` needs:
    ```bash
-   sudo chown root:wheel "/Users/$TEST_USER/pen/penctl/commands/lib/pfctl-wrapper.sh"
-   sudo chmod 755 "/Users/$TEST_USER/pen/penctl/commands/lib/pfctl-wrapper.sh"
+   cat <<SUDOERS | sudo tee "/etc/sudoers.d/pen-e2e-test-user-setup" > /dev/null
+   $TEST_USER ALL=(root) NOPASSWD: /usr/sbin/chown root\:wheel *
+   $TEST_USER ALL=(root) NOPASSWD: /bin/chmod 755 *
+   $TEST_USER ALL=(root) NOPASSWD: /bin/chmod 440 *
+   $TEST_USER ALL=(root) NOPASSWD: /usr/bin/tee /etc/sudoers.d/pen-*
+   $TEST_USER ALL=(root) NOPASSWD: /usr/sbin/visudo -cf /etc/sudoers.d/pen-*
+   $TEST_USER ALL=(root) NOPASSWD: /bin/rm -f /etc/sudoers.d/pen-*
+   SUDOERS
+   sudo chmod 440 "/etc/sudoers.d/pen-e2e-test-user-setup"
+   sudo visudo -cf "/etc/sudoers.d/pen-e2e-test-user-setup"
    ```
 
-3. Write the test user's sudoers entry:
-   ```bash
-   WRAPPER="/Users/$TEST_USER/pen/penctl/commands/lib/pfctl-wrapper.sh"
-   echo "$TEST_USER ALL=(root) NOPASSWD: $WRAPPER" | sudo tee "/etc/sudoers.d/pen-$TEST_USER" > /dev/null
-   sudo chmod 440 "/etc/sudoers.d/pen-$TEST_USER"
-   sudo visudo -cf "/etc/sudoers.d/pen-$TEST_USER"
-   ```
-
-4. Set up PATH and create `~/.pen`:
+3. Ensure `~/.local/bin` is on the test user's PATH:
    ```bash
    sudo -u "$TEST_USER" bash -c '
-     mkdir -p ~/.local/bin ~/.pen/sandboxes
-     ln -sf ~/pen/pen ~/.local/bin/pen
+     mkdir -p ~/.local/bin
+     echo "export PATH=\$HOME/.local/bin:\$PATH" >> ~/.zprofile
    '
+   ```
+
+4. Run `install.sh` as the test user (exercises the full install path):
+   ```bash
+   run_as_test_user bash -c "cd ~/pen && ./install.sh"
    ```
 
 ### Teardown
@@ -105,6 +110,7 @@ The test user does not need to be an admin. Privileged setup is pre-staged by th
 ```bash
 # Clean up any running pen sandboxes under the test user first
 sudo rm -f "/etc/sudoers.d/pen-$TEST_USER"
+sudo rm -f "/etc/sudoers.d/pen-e2e-test-user-setup"
 sudo sysadminctl -deleteUser "$TEST_USER" -secure
 ```
 
@@ -139,7 +145,7 @@ This executes within the test user's launchd domain, which should allow the apis
 
 ### Option B: SSH to localhost (fallback)
 
-Set up an SSH keypair for the test user and connect via `ssh pen-test@localhost <command>`. SSH fully initialises the launchd domain. Downside: requires `sshd` to be running and SSH key setup in the test harness.
+Set up an SSH keypair for the test user and connect via `ssh $TEST_USER@localhost <command>`. SSH fully initialises the launchd domain. Downside: requires `sshd` to be running and SSH key setup in the test harness.
 
 ### Option C: `su -` with password (last resort)
 
@@ -194,7 +200,7 @@ Files are numbered to enforce execution order.
 
 - `install.sh` creates `~/.local/bin/pen` symlink
 - `install.sh` does not touch `/usr/local/bin/pen`
-- Per-user sudoers file exists at `/etc/sudoers.d/pen-pen-test`
+- Per-user sudoers file exists at `/etc/sudoers.d/pen-$TEST_USER`
 - Two users can install pen without overwriting each other's sudoers
 - `uninstall.sh` removes per-user symlink and sudoers
 
@@ -248,7 +254,7 @@ Note: build tests are slow (Docker Hub pull). Use a minimal test Dockerfile from
 
 ### OQ-1: Does the Container apiserver start under `launchctl asuser`?
 
-If `sudo launchctl asuser <uid> sudo -u pen-test container list` fails with a connection error, the apiserver did not auto-start. Fall back to SSH (Option B). This must be tested experimentally before committing to an execution mechanism.
+If `sudo launchctl asuser <uid> sudo -u $TEST_USER container list` fails with a connection error, the apiserver did not auto-start. Fall back to SSH (Option B). This must be tested experimentally before committing to an execution mechanism.
 
 ### OQ-2: Does the test user need specific macOS groups?
 
@@ -268,7 +274,7 @@ These tests require a macOS host with Apple Silicon, macOS Tahoe (26.x+), and th
 
 1. Change `install.sh`: use `~/.local/bin/pen` and `/etc/sudoers.d/pen-$(whoami)`
 2. Change `uninstall.sh` to match
-3. Write ADR superseding ADR 0009
+3. Write ADRs (done: ADR 0018 and ADR 0019)
 4. Add `--no-shell` flag to `start.sh`
 5. Manual verification that two users can install pen on the same host
 
