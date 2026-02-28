@@ -58,7 +58,7 @@
 
 | # | Item | Notes | Security Concern? |
 |---|------|-------|-------------------|
-| 1 | End-to-end tests | Automated testing of pen scripts end to end. Use [nested virtualization](https://github.com/apple/container/blob/main/docs/how-to.md#expose-virtualization-capabilities-to-a-container) (`container run --virtualization`) to run tests inside an Apple Container, avoiding interference with the host machine's installed `pen`. Requires M3 or newer Apple silicon and a macOS container image (not Linux), since pen depends on macOS host tools (pf, Apple `container` CLI) | |
+| 1 | End-to-end tests | Automated testing of pen scripts end to end. Run under a temporary macOS user (`pen-test`) on the same host for full isolation without nested virtualisation (which macOS does not support). See `doc/testing-strategy.md` for the full plan | |
 | 2 | Unit tests | Unit tests for individual functions and scripts | |
 
 ## Code quality
