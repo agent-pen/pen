@@ -22,21 +22,12 @@ After tests complete, the temporary user and all its state are torn down.
 
 Confirmed: the `container` CLI stores all data under `~/Library/Application Support/com.apple.container/` and runs a per-user launch agent (`com.apple.container.apiserver`). Images, containers, networks, and volumes are scoped to the calling macOS user. The test user gets a completely separate container environment with no visibility into the developer's containers.
 
-## System-wide touchpoints
+## System-wide touchpoints — RESOLVED
 
-pen currently installs two system-wide resources that prevent two users from having independent installations simultaneously. Both must be changed before multi-user testing can work.
+Both system-wide conflicts have been resolved:
 
-### `/usr/local/bin/pen` symlink
-
-`install.sh` creates `sudo ln -sf $PEN_HOME/pen /usr/local/bin/pen`. Two users cannot both own this symlink.
-
-**Required change:** install to `~/.local/bin/pen` instead (no sudo needed). The install script should verify `~/.local/bin` is on `PATH` and warn if not. ADR 0009 (install-into-path) must be superseded.
-
-### `/etc/sudoers.d/pen`
-
-`install.sh` writes a single sudoers file granting `$(whoami)` passwordless sudo for `pfctl-wrapper.sh`. A second user running `install.sh` overwrites this file, revoking the first user's grant.
-
-**Required change:** use `/etc/sudoers.d/pen-$(whoami)` so entries coexist. Both `install.sh` and `uninstall.sh` must be updated.
+- **`~/.local/bin/pen` symlink**: `install.sh` now installs per-user (no `/usr/local/bin`). See ADR 0019.
+- **`/etc/sudoers.d/pen-$USER`**: Per-user sudoers files coexist. `install.sh` requires `sudo` and uses `$SUDO_USER` internally.
 
 ### Resources that are already isolated
 
@@ -48,11 +39,9 @@ pen currently installs two system-wide resources that prevent two users from hav
 | `~/.pen/sandboxes/` | Per-user via `$HOME` | No change needed |
 | `.pen/` in project dir | Per-project | No change needed |
 
-## The non-interactive `pen start` problem
+## The non-interactive `pen start` problem — RESOLVED
 
-`start.sh` ends with `container exec -it ... bash`, dropping into an interactive shell. This hangs in automated tests.
-
-**Required change:** make `pen start` non-interactive — it starts the sandbox and returns. The interactive shell moves to `pen shell`, which runs `pen start` as a prerequisite. `pen exec` also runs `pen start` as a prerequisite.
+`pen start` is now non-interactive — it starts the sandbox and returns. The interactive shell moved to `pen shell`. Both `pen shell` and `pen exec` auto-start as a prerequisite.
 
 ## Test user lifecycle
 
@@ -117,7 +106,7 @@ setup_suite() {
 
 The Apple Container apiserver is a per-user launch agent. It requires an active launchd user domain. Three candidate mechanisms, in order of preference:
 
-### Option A: `launchctl asuser` (recommended, needs validation)
+### Option A: `launchctl asuser` (validated, recommended)
 
 ```bash
 TEST_UID=$(id -u "$TEST_USER")
@@ -126,7 +115,7 @@ run_as_test_user() {
 }
 ```
 
-This executes within the test user's launchd domain, which should allow the apiserver to start on demand. **This needs experimental validation** — see open questions below.
+This executes within the test user's launchd domain, allowing the apiserver to start on demand. Validated via `test/e2e/validate-oq1.sh`.
 
 ### Option B: SSH to localhost (fallback)
 
@@ -249,12 +238,12 @@ launchctl asuser "$TEST_UID" sudo -u "$TEST_USER" container list
 
 Caveats discovered during validation:
 - `sysadminctl -addUser -createHomeDirectory` does not actually create the home directory. Use `createhomedir -c -u "$TEST_USER"` after user creation.
-- `container system start` requires `--enable-kernel-install` to skip an interactive kernel download prompt. To avoid the ~450MB kernel download on every run, copy the kernel from the invoking user's `~/Library/Application Support/com.apple.container/kernels/` to the test user's equivalent directory before starting the service.
+- `container system start` is handled transparently by pen (via `ensure_container_system` in `common.sh`) using `--enable-kernel-install`, which is a no-op when the kernel is already present. To avoid the ~450MB kernel download on every test run, the test harness copies the kernel from the invoking user's `~/Library/Application Support/com.apple.container/kernels/` to the test user's equivalent directory before running any pen commands.
 - macOS may show a TCC "administer your computer" prompt when `sysadminctl` creates/deletes users from a terminal app. This appears intermittently (possibly related to script content changes). Clicking "Don't Allow" still allows the test to pass (with a `-14120` error logged). On headless CI runners this prompt does not appear.
 
 ### OQ-2: Does the test user need specific macOS groups?
 
-With the pre-staging approach, the test user never calls `sudo` directly during install — the primary user handles all privileged ops. The test user only needs `sudo` for `pfctl-wrapper.sh` at runtime (via the per-user sudoers entry). This should work for a standard (non-admin) user, but needs verification.
+The test user does not call `sudo` directly. `install.sh` is run by the test harness via `sudo SUDO_USER="$TEST_USER"`. At runtime, the test user only needs `sudo` for `pfctl-wrapper.sh` (granted by the per-user sudoers entry that `install.sh` creates). This should work for a standard (non-admin) user, but needs verification.
 
 ### OQ-3: Docker Hub pulls during `pen build`
 
@@ -272,25 +261,27 @@ These tests require a macOS host with Apple Silicon, macOS Tahoe (26.x+), and th
 2. ~~Change `uninstall.sh` to match~~
 3. ~~Write ADRs (done: ADR 0018, 0019, 0020)~~
 4. ~~Make `pen start` non-interactive; `pen shell` and `pen exec` auto-start~~
-5. Manual verification that two users can install pen on the same host (deferred to Phase 2)
+5. ~~Require `sudo` for `install.sh`/`uninstall.sh`; use `$SUDO_USER` internally~~
+6. ~~Auto-start container system transparently via `ensure_container_system`~~
+7. Manual verification that two users can install pen on the same host (deferred to Phase 2)
 
 ### Phase 2: Test infrastructure — NEXT
 
-6. Install bats-core (`brew install bats-core`)
-7. Create `test/e2e/` directory structure
-8. Implement `setup_suite.bash` (test user lifecycle)
-9. Implement helpers (`run_as.bash`, `assertions.bash`)
-10. Validate OQ-1 (apiserver auto-start mechanism)
+8. Install bats-core (`brew install bats-core`)
+9. Create `test/e2e/` directory structure
+10. Implement `setup_suite.bash` (test user lifecycle)
+11. Implement helpers (`run_as.bash`, `assertions.bash`)
+12. ~~Validate OQ-1 (apiserver auto-start mechanism)~~
 
 ### Phase 3: Test scenarios (incremental)
 
 Start with a single happy-path test covering the full journey (install, build, start, exec, uninstall), then extend with scenario-specific tests (e.g. network control).
 
-11. Happy-path end-to-end test
-12. Network/egress control scenarios
-13. Additional scenarios as needed
+13. Happy-path end-to-end test
+14. Network/egress control scenarios
+15. Additional scenarios as needed
 
 ### Phase 4: CI
 
-14. Write `test/run-e2e.sh` runner script
-15. Configure CI workflow (self-hosted macOS runner)
+16. Write `test/run-e2e.sh` runner script
+17. Configure CI workflow (self-hosted macOS runner)

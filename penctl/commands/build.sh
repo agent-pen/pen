@@ -4,6 +4,8 @@ set -o nounset -o errexit -o pipefail
 
 source "${PEN_HOME}/penctl/commands/lib/common.sh"
 
+ensure_container_system
+
 if [[ -f "${PEN_PROJECT}/.pen/Dockerfile" ]]; then
   dockerfile="${PEN_PROJECT}/.pen/Dockerfile"
   context="$PEN_PROJECT"

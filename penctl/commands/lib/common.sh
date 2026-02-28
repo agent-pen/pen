@@ -1,5 +1,11 @@
 # Sourced by pen subcommands. PEN_HOME and PEN_PROJECT must be set by the pen dispatcher.
 
+ensure_container_system() {
+  if ! container system status &>/dev/null; then
+    container system start --enable-kernel-install
+  fi
+}
+
 path_hash=$(printf '%s' "$PEN_PROJECT" | shasum | cut -c1-6)
 container_name="pen-$(basename "$PEN_PROJECT")-${path_hash}"
 target="${container_name}-container"

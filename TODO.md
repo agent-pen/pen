@@ -61,6 +61,8 @@
 |---|------|-------|-------------------|
 | 1 | End-to-end tests | Automated testing of pen scripts end to end. Run under a temporary macOS user (`pen-e2e-test-user`) on the same host for full isolation without nested virtualisation (which macOS does not support). See `doc/testing-strategy.md` for the full plan | |
 | 2 | Unit tests | Unit tests for individual functions and scripts | |
+| 3 | Run e2e tests in CI | Self-hosted macOS runner (Apple Silicon, Tahoe 26.x+). See `doc/testing-strategy.md` Phase 4 | |
+| 4 | Verify `--enable-kernel-install` downloads without prompting in CI | CI won't have a pre-copied kernel, so `ensure_container_system` will trigger the ~450MB download. Verify this completes non-interactively | |
 
 ## Code quality
 

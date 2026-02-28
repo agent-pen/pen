@@ -105,3 +105,19 @@ else
   echo "Output:"
   echo "$output"
 fi
+
+# --- Validate: --enable-kernel-install is a no-op when kernel exists ---
+
+echo ""
+echo "--- Validate: --enable-kernel-install idempotency ---"
+echo "Kernel already present at: $(ls "$KERNEL_DST" 2>/dev/null || echo '(not found)')"
+echo "Running: container system start --enable-kernel-install (should be a no-op)..."
+echo ""
+
+if output="$(launchctl asuser "$TEST_UID" sudo -u "$TEST_USER" container system start --enable-kernel-install 2>&1)"; then
+  echo "PASS: --enable-kernel-install returned success"
+else
+  echo "WARN: --enable-kernel-install returned exit code $?"
+fi
+echo "Output:"
+echo "$output"
