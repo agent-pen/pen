@@ -7,7 +7,6 @@ source "${PEN_HOME}/penctl/commands/lib/common.sh"
 # --- Already running? ---
 
 if pen_is_running; then
-  echo "Pen already running."
   exit 0
 fi
 
@@ -103,6 +102,4 @@ container exec "$target" bash -c "
   chmod 600 ~/.ssh/config
 "
 
-# --- 7. Drop into shell ---
-
-container exec -it --workdir "$PEN_PROJECT" "$target" bash
+echo "Sandbox running."

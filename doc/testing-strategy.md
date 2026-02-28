@@ -52,7 +52,7 @@ pen currently installs two system-wide resources that prevent two users from hav
 
 `start.sh` ends with `container exec -it ... bash`, dropping into an interactive shell. This hangs in automated tests.
 
-**Required change:** add a `--no-shell` flag (or `--detach`, or similar) that skips the final interactive exec. This is also useful for scripted/CI use outside of testing.
+**Required change:** make `pen start` non-interactive — it starts the sandbox and returns. The interactive shell moves to `pen shell`, which runs `pen start` as a prerequisite. `pen exec` also runs `pen start` as a prerequisite.
 
 ## Test user lifecycle
 
@@ -223,7 +223,7 @@ Note: build tests are slow (Docker Hub pull). Use a minimal test Dockerfile from
 ### Lifecycle (`04_lifecycle.bats`)
 
 - `pen status` exits 1 when not running
-- `pen start --no-shell` starts the container and returns
+- `pen start` starts the container and returns
 - `pen status` exits 0 when running
 - `pen stop` stops the container
 - `pen stop` removes the pf anchor, container network, and proxy process
@@ -275,7 +275,7 @@ These tests require a macOS host with Apple Silicon, macOS Tahoe (26.x+), and th
 1. Change `install.sh`: use `~/.local/bin/pen` and `/etc/sudoers.d/pen-$(whoami)`
 2. Change `uninstall.sh` to match
 3. Write ADRs (done: ADR 0018 and ADR 0019)
-4. Add `--no-shell` flag to `start.sh`
+4. Make `pen start` non-interactive; move shell to `pen shell`
 5. Manual verification that two users can install pen on the same host
 
 ### Phase 2: Test infrastructure

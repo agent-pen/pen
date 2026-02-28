@@ -27,6 +27,6 @@ Test user creation, setup, and teardown are managed by the test harness. The tes
 ## Consequences
 
 - pen's install must support multiple users on the same machine. The symlink and sudoers file must be per-user (see ADR 0019).
-- `pen start` must support a non-interactive mode (e.g. `--no-shell`) so tests can start a sandbox without hanging on an interactive shell.
+- `pen start` must be non-interactive. The interactive shell is provided by `pen shell`, which runs `pen start` as a prerequisite.
 - Tests require macOS Tahoe (26.x+) with Apple Silicon. Standard GitHub Actions macOS runners may not yet offer this.
 - The test user has a stable name (`pen-e2e-test-user`) so that the setup sudoers entry only needs to be created once. This avoids requiring a password on every test run.
