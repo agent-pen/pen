@@ -270,15 +270,15 @@ These tests require a macOS host with Apple Silicon, macOS Tahoe (26.x+), and th
 
 ## Implementation sequence
 
-### Phase 1: Prerequisites (pen changes)
+### Phase 1: Prerequisites (pen changes) — DONE
 
-1. Change `install.sh`: use `~/.local/bin/pen` and `/etc/sudoers.d/pen-$(whoami)`
-2. Change `uninstall.sh` to match
-3. Write ADRs (done: ADR 0018 and ADR 0019)
-4. Make `pen start` non-interactive; move shell to `pen shell`
-5. Manual verification that two users can install pen on the same host
+1. ~~Change `install.sh`: use `~/.local/bin/pen` and `/etc/sudoers.d/pen-$(whoami)`~~
+2. ~~Change `uninstall.sh` to match~~
+3. ~~Write ADRs (done: ADR 0018, 0019, 0020)~~
+4. ~~Make `pen start` non-interactive; `pen shell` and `pen exec` auto-start~~
+5. Manual verification that two users can install pen on the same host (deferred to Phase 2)
 
-### Phase 2: Test infrastructure
+### Phase 2: Test infrastructure — NEXT
 
 6. Install bats-core (`brew install bats-core`)
 7. Create `test/e2e/` directory structure
@@ -288,15 +288,13 @@ These tests require a macOS host with Apple Silicon, macOS Tahoe (26.x+), and th
 
 ### Phase 3: Test scenarios (incremental)
 
-11. `01_install.bats`
-12. `02_init.bats`
-13. `03_build.bats` (with minimal test Dockerfile)
-14. `04_lifecycle.bats`
-15. `05_exec.bats`
-16. `06_egress.bats`
-17. `07_teardown.bats`
+Start with a single happy-path test covering the full journey (install, build, start, exec, uninstall), then extend with scenario-specific tests (e.g. network control).
+
+11. Happy-path end-to-end test
+12. Network/egress control scenarios
+13. Additional scenarios as needed
 
 ### Phase 4: CI
 
-18. Write `test/run-e2e.sh` runner script
-19. Configure CI workflow (self-hosted macOS runner)
+14. Write `test/run-e2e.sh` runner script
+15. Configure CI workflow (self-hosted macOS runner)
