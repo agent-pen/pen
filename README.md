@@ -22,7 +22,7 @@ cd pen
 ./install.sh
 ```
 
-This symlinks `pen` into `/usr/local/bin` and configures passwordless sudo for firewall management. You will be prompted for your password once.
+This symlinks `pen` into `~/.local/bin` and configures passwordless sudo for firewall management. You will be prompted for your password once. Ensure `~/.local/bin` is on your PATH.
 
 ## Removal
 
@@ -61,7 +61,7 @@ Uses the default Dockerfile. To customize, place a `Dockerfile` in `.pen/` and i
 pen start
 ```
 
-This creates an isolated VM with network restrictions and drops you into an interactive shell. Your project directory is mounted at the same path inside the sandbox.
+This creates an isolated VM with network restrictions. Your project directory is mounted at the same path inside the sandbox. Use `pen shell` to open an interactive shell.
 
 ### Stop the sandbox
 
@@ -76,8 +76,8 @@ Tears down the VM, proxy, and firewall rules. The sandbox is ephemeral: all data
 ```bash
 pen restart           # Stop and start
 pen status            # Check if the sandbox is running
-pen shell             # Open a shell in a running sandbox
-pen exec <cmd>        # Run a command in the sandbox
+pen shell             # Open a shell (starts sandbox if needed)
+pen exec <cmd>        # Run a command (starts sandbox if needed)
 pen proxy logs        # Tail the HTTP proxy log
 ```
 
