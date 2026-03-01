@@ -4,7 +4,7 @@ Date: 2026-02-28
 
 ## Status
 
-Accepted
+Superceded by [24. UID-based sudoers file naming](0024-uid-based-sudoers-file-naming.md)
 
 Extends [15. Grant sudo to script for passwordless firewall management](0015-grant-sudo-to-script-for-passwordless-firewall-management.md)
 
