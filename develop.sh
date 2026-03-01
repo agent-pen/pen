@@ -17,6 +17,7 @@ SUDOERS_FILE="/etc/sudoers.d/pen-dev-${REAL_UID}"
 if [[ "${1:-}" == "--undo" ]]; then
   rm -f "$SUDOERS_FILE"
   chown "$REAL_USER:staff" "${PEN_HOME}/test/run-e2e.sh"
+  sudo -u "$REAL_USER" git -C "$PEN_HOME" config --unset core.hooksPath || true
   echo "Dev setup undone."
   exit 0
 fi
@@ -31,5 +32,7 @@ sudoers_line="${REAL_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/run-e2e.sh"
 echo "$sudoers_line" | tee "$SUDOERS_FILE" > /dev/null
 chmod 440 "$SUDOERS_FILE"
 visudo -cf "$SUDOERS_FILE" > /dev/null 2>&1
+
+sudo -u "$REAL_USER" git -C "$PEN_HOME" config core.hooksPath .githooks
 
 echo "Dev setup complete."
