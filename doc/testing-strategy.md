@@ -268,10 +268,17 @@ These tests require a macOS host with Apple Silicon, macOS Tahoe (26.x+), and th
 ### Phase 2: Test infrastructure — NEXT
 
 8. Install bats-core (`brew install bats-core`)
-9. Create `test/e2e/` directory structure
-10. Implement `setup_suite.bash` (test user lifecycle)
-11. Implement helpers (`run_as.bash`, `assertions.bash`)
+9. Create `test/run-e2e.sh` — root-level orchestrator that creates the test user, runs bats, and tears down. This is the script that gets a sudoers entry for passwordless execution
+10. Create `test/e2e/setup_suite.bash` — bats suite-level hooks exporting helpers and variables (no user lifecycle — that's in `run-e2e.sh`)
+11. Create `development.sh` — one-time dev setup script (run with `sudo`) that adds the sudoers entry for `test/run-e2e.sh`. Separate from `install.sh`, which is for end users only
 12. ~~Validate OQ-1 (apiserver auto-start mechanism)~~
+
+Design decisions:
+
+- **`install.sh` / `uninstall.sh` are test scenarios, not infrastructure.** They run inside the happy-path test (`01_install.bats` etc.), not in suite setup. This exercises the full install path as a test.
+- **`run-e2e.sh` owns the test user lifecycle.** It creates the user, copies the container kernel, clones pen, and tears down after bats finishes. `setup_suite.bash` only exports helpers.
+- **No `-createHomeDirectory` flag.** `sysadminctl -addUser` without it, then `createhomedir -c -u` separately (the flag is unreliable).
+- **Passwordless execution via sudoers.** `development.sh` adds a per-user sudoers entry for `test/run-e2e.sh` so developers never type a password to run tests.
 
 ### Phase 3: Test scenarios (incremental)
 
@@ -283,5 +290,4 @@ Start with a single happy-path test covering the full journey (install, build, s
 
 ### Phase 4: CI
 
-16. Write `test/run-e2e.sh` runner script
-17. Configure CI workflow (self-hosted macOS runner)
+16. Configure CI workflow (self-hosted macOS runner)
