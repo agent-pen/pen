@@ -25,11 +25,16 @@ delete_test_user() {
 }
 
 create_test_user() {
+  # FDE (FileVault) warning is expected — suppressing it requires admin credentials
+  # which we don't have non-interactively. The test user doesn't need FDE.
   sysadminctl -addUser "$TEST_USER" \
     -fullName "pen test user" \
     -password "$TEST_PASSWORD" \
     -home "/Users/$TEST_USER" 2>&1
 
+  # sysadminctl's -createHomeDirectory flag is broken — it logs
+  # "Home directory is assigned (not created!)" and doesn't create it.
+  # createhomedir works reliably.
   createhomedir -c -u "$TEST_USER" 2>&1
 }
 
