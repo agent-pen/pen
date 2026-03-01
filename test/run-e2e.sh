@@ -16,8 +16,9 @@ require_root() {
 }
 
 delete_test_user() {
-  local sanitized_user="${TEST_USER//./_}"
-  rm -f "/etc/sudoers.d/pen-${sanitized_user}"
+  if id "$TEST_USER" &>/dev/null; then
+    rm -f "/etc/sudoers.d/pen-$(id -u "$TEST_USER")"
+  fi
 
   if id "$TEST_USER" &>/dev/null; then
     sysadminctl -deleteUser "$TEST_USER" -secure 2>&1 || true

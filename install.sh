@@ -13,7 +13,8 @@ REAL_HOME="$(eval echo "~${REAL_USER}")"
 
 PEN_HOME="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PFCTL_WRAPPER="${PEN_HOME}/penctl/commands/lib/pfctl-wrapper.sh"
-SUDOERS_FILE="/etc/sudoers.d/pen-${REAL_USER//./_}"
+REAL_UID="$(id -u "$REAL_USER")"
+SUDOERS_FILE="/etc/sudoers.d/pen-${REAL_UID}"
 LOCAL_BIN="${REAL_HOME}/.local/bin"
 
 # Symlink pen into per-user PATH

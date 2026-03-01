@@ -11,8 +11,8 @@ fi
 REAL_USER="${SUDO_USER:?uninstall.sh must be run with sudo, not as root directly}"
 REAL_HOME="$(eval echo "~${REAL_USER}")"
 
-rm -f "/etc/sudoers.d/pen-${REAL_USER//./_}"
-rm -f "/etc/sudoers.d/pen-${REAL_USER}"  # clean up old installs
+REAL_UID="$(id -u "$REAL_USER")"
+rm -f "/etc/sudoers.d/pen-${REAL_UID}"
 rm -f "${REAL_HOME}/.local/bin/pen"
 
 echo "Uninstall complete."
