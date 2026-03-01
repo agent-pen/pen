@@ -69,7 +69,7 @@
 | # | Item | Notes | Security Concern? |
 |---|------|-------|-------------------|
 | 1 | Investigate adding Apple `container` CLI to Brewfile | Compatibility with existing direct installs is unknown — may conflict | |
-| 2 | `development.sh` sudoers entry for passwordless `test/run-e2e.sh` | Deferred — just use `sudo` for now | |
+| 2 | ~~`development.sh` sudoers entry for passwordless `test/run-e2e.sh`~~ | Done | |
 
 ## Code quality
 

@@ -28,13 +28,9 @@ brew "bats-core"
 
 ### 4. Create `development.sh` — one-time dev machine setup
 
-No sudo required — just runs `brew bundle`. Responsibilities:
-- Install base + dev Homebrew dependencies:
-  ```bash
-  HOMEBREW_NO_AUTO_UPDATE=1 brew bundle --file=Brewfile
-  HOMEBREW_NO_AUTO_UPDATE=1 brew bundle --file=Brewfile.dev
-  ```
-- That's it for now.
+Run with `sudo`. Installs Homebrew deps and sets up passwordless sudo for test runs. Responsibilities:
+- Install base + dev Homebrew dependencies (as `$SUDO_USER`)
+- Add sudoers entry for passwordless `test/run-e2e.sh`
 
 ### 5. Create `test/run-e2e.sh` — orchestrator (run with `sudo`)
 
@@ -83,6 +79,6 @@ Single test case:
 
 ## Verification
 
-1. Run `./development.sh` — installs bats-core and other deps
+1. Run `sudo ./development.sh` — installs bats-core and other deps, sets up passwordless sudo
 2. Run `sudo test/run-e2e.sh` — should produce TAP output with 1 passing test
 3. Confirm test user is cleaned up: `id pen-e2e-test-user` should fail
