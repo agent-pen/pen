@@ -26,3 +26,4 @@ There are no tests, linters, or build steps for pen itself.
 - Uses Apple's `container` CLI (not `docker`) for VM operations.
 - Architecture decisions are recorded as ADRs in `doc/adr/` managed with the [`adr` CLI tool](https://github.com/npryce/adr-tools). Create new ADRs with `adr new "Title"`. To supersede an existing ADR: `adr new -s <number> "Title"`.
 - Per-project egress config (allowlists) lives in `$HOME/.pen/sandboxes/<container-name>/`. Runtime artifacts (PID, logs) live in `.pen/` within the user's project directory.
+- **Working principle: simplest next step.** Bias for action over speculation. Get to the simplest working version as fast as possible, then iterate. Let each small step reveal the next blocker. Speculation is fine during planning, but implementation should drive out the simplest solution. Refactor to manage complexity later — avoid bloated solutions from speculated dependencies.
