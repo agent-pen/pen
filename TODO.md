@@ -69,13 +69,14 @@
 | # | Item | Notes | Security Concern? |
 |---|------|-------|-------------------|
 | 1 | Investigate adding Apple `container` CLI to Brewfile | Compatibility with existing direct installs is unknown — may conflict | |
-| 2 | ~~`development.sh` sudoers entry for passwordless `test/run-e2e.sh`~~ | Done | |
+| 2 | ~~`develop.sh` sudoers entry for passwordless `test/run-e2e.sh`~~ | Done | |
 
 ## Code quality
 
 | # | Item | Notes | Security Concern? |
 |---|------|-------|-------------------|
 | 1 | Decompose `start.sh` | Split into separate concerns in separate scripts or functions | |
-| 2 | Reduce duplication across scripts | Reduce duplication across `install.sh`, `uninstall.sh`, and other scripts | |
+| 2 | Migrate `uninstall.sh` into `install.sh --undo` | Consolidate install and uninstall into a single script, matching the `develop.sh --undo` pattern | |
+| 3 | Reduce duplication across scripts | Reduce duplication across `install.sh`, `uninstall.sh`, and other scripts | |
 | 3 | Collapse `./penctl` into project root | Move contents of `penctl/` to the project root to flatten the directory structure | |
 | 4 | Evaluate removing `request()` from egress proxy | Determine whether `request()` can be removed from `penctl/commands/lib/egress-proxy.py` | |
