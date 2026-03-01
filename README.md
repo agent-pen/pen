@@ -90,3 +90,21 @@ github.com:22
 ```
 
 No additional configuration is needed.
+
+## Development
+
+One-time setup:
+
+```bash
+sudo ./develop.sh
+```
+
+This installs dev dependencies, configures passwordless sudo for the test runner, and sets up git hooks. To remove: `sudo ./develop.sh --undo`.
+
+Run end-to-end tests:
+
+```bash
+sudo test/run-e2e.sh
+```
+
+Tests also run automatically via the git pre-commit hook.
