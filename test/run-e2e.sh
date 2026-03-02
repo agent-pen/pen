@@ -21,7 +21,7 @@ delete_test_user() {
   fi
 
   if id "$TEST_USER" &>/dev/null; then
-    sysadminctl -deleteUser "$TEST_USER" -secure 2>&1 || true
+    sysadminctl -deleteUser "$TEST_USER" 2>&1 || true
   fi
 }
 
@@ -39,32 +39,63 @@ create_test_user() {
   createhomedir -c -u "$TEST_USER" 2>&1
 }
 
-copy_container_kernel() {
-  local kernels_subpath="Library/Application Support/com.apple.container/kernels"
+copy_container_data() {
+  local container_base="Library/Application Support/com.apple.container"
   local sudo_user_home
   sudo_user_home="$(eval echo "~${SUDO_USER}")"
-  local kernel_src="$sudo_user_home/$kernels_subpath"
-  local kernel_dst="/Users/$TEST_USER/$kernels_subpath"
+  local src="$sudo_user_home/$container_base"
+  local dst="/Users/$TEST_USER/$container_base"
 
-  if [[ -d "$kernel_src" ]]; then
-    sudo -u "$TEST_USER" mkdir -p "$kernel_dst"
-    cp "$kernel_src"/* "$kernel_dst"/
-    chown -R "$TEST_USER:staff" "$kernel_dst"
-  else
-    echo "Warning: No container kernel found at $kernel_src"
-    echo "The test run will trigger a several-hundred-MB kernel download, which may take a while."
-  fi
+  for subdir in kernels content; do
+    if [[ -d "$src/$subdir" ]]; then
+      sudo -u "$TEST_USER" mkdir -p "$dst/$subdir"
+      cp -R "$src/$subdir"/* "$dst/$subdir"/
+      # Fix symlinks that contain absolute paths to the source user's home
+      find "$dst/$subdir" -type l | while read -r link; do
+        local target
+        target="$(readlink "$link")"
+        if [[ "$target" == "$sudo_user_home"* ]]; then
+          ln -sf "${target/$sudo_user_home//Users/$TEST_USER}" "$link"
+        fi
+      done
+      chown -R "$TEST_USER:staff" "$dst/$subdir"
+    else
+      echo "Warning: $src/$subdir not found — will be downloaded at runtime."
+    fi
+  done
 }
 
-clone_pen_for_test_user() {
-  TEST_PROJECT="/Users/$TEST_USER/pen"
-  git clone --local "$PEN_HOME" "$TEST_PROJECT"
-  chown -R "$TEST_USER:staff" "$TEST_PROJECT"
+start_container_apiserver() {
+  local test_uid
+  test_uid="$(id -u "$TEST_USER")"
+  launchctl asuser "$test_uid" sudo -u "$TEST_USER" container system start
+
+  echo "Waiting for container apiserver to be ready..."
+  local attempts=0
+  while ! launchctl asuser "$test_uid" sudo -u "$TEST_USER" container image list &>/dev/null; do
+    attempts=$((attempts + 1))
+    if [[ "$attempts" -ge 30 ]]; then
+      echo "Error: container apiserver did not become ready after 30 seconds" >&2
+      exit 1
+    fi
+    sleep 1
+  done
+  echo "Container apiserver is ready."
+}
+
+setup_test_directories() {
+  PEN_SOURCE="/Users/$TEST_USER/pen-source"
+  cp -R "$PEN_HOME" "$PEN_SOURCE"
+  chown -R "$TEST_USER:staff" "$PEN_SOURCE"
+
+  TEST_PROJECT="/Users/$TEST_USER/test-project"
+  sudo -u "$TEST_USER" mkdir -p "$TEST_PROJECT"
 }
 
 run_bats() {
   export TEST_USER
   export TEST_UID="$(id -u "$TEST_USER")"
+  export PEN_SOURCE
   export TEST_PROJECT
   bats "${PEN_HOME}/test/e2e/"
 }
@@ -75,6 +106,7 @@ require_root
 delete_test_user
 trap delete_test_user EXIT
 create_test_user
-copy_container_kernel
-clone_pen_for_test_user
+copy_container_data
+start_container_apiserver
+setup_test_directories
 run_bats
