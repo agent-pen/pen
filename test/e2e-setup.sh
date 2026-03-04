@@ -66,6 +66,9 @@ copy_container_data() {
 }
 
 start_container_apiserver() {
+  # Restart to clear any stale networking state (e.g. pending network operations)
+  # left over from a previous test user with the same name.
+  launchctl asuser "$TEST_UID" sudo -u "$TEST_USER" container system stop 2>/dev/null || true
   launchctl asuser "$TEST_UID" sudo -u "$TEST_USER" container system start
 
   echo "Waiting for container apiserver to be ready..."

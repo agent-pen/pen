@@ -228,6 +228,8 @@ No admin group membership or blanket sudo required. Standard (non-admin) user sh
 
 The default Dockerfile uses `FROM docker/sandbox-templates:claude-code`, which is large and may require Docker Hub auth. For build tests, use a minimal Dockerfile (e.g. `FROM alpine:latest`) in `test/e2e/fixtures/` to avoid this dependency.
 
+**TODO:** The BuildKit image (~100MB) is downloaded on every test run because it's per-user and the test user is recreated each time. Copy it during `e2e-setup.sh` alongside kernels/content to avoid this repeated download.
+
 ### OQ-4: CI
 
 These tests require a macOS host with Apple Silicon, macOS Tahoe (26.x+), and the Apple Container CLI. Standard CI macOS runners (GitHub Actions) may not yet offer Tahoe images. A self-hosted runner is the realistic path. Gate the workflow on `sw_vers -productVersion`.
