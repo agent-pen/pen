@@ -9,16 +9,9 @@ if [[ "$(id -u)" -ne 0 ]]; then
   exit 1
 fi
 
-TEST_USER="pen-e2e-test-user"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/e2e-lib.sh"
 
-# Derive UID from the user if they exist; sudoers cleanup needs it
-if id "$TEST_USER" &>/dev/null; then
-  TEST_UID="$(id -u "$TEST_USER")"
-
-  rm -f "/etc/sudoers.d/pen-${TEST_UID}-e2e-test"
-  rm -f "/etc/sudoers.d/pen-${TEST_UID}"
-
-  sysadminctl -deleteUser "$TEST_USER" 2>&1 || true
-fi
+delete_test_user
 
 echo "Teardown complete."

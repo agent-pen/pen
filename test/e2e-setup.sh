@@ -4,8 +4,8 @@
 
 set -o nounset -o errexit -o pipefail
 
-TEST_USER="pen-e2e-test-user"
 PEN_REPO_SRC="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$PEN_REPO_SRC/test/e2e-lib.sh"
 
 require_root() {
   if [[ "$(id -u)" -ne 0 ]]; then
@@ -17,9 +17,7 @@ require_root() {
 delete_leftover_test_user() {
   if id "$TEST_USER" &>/dev/null; then
     echo "Cleaning up leftover test user..."
-    rm -f "/etc/sudoers.d/pen-$(id -u "$TEST_USER")-e2e-test"
-    rm -f "/etc/sudoers.d/pen-$(id -u "$TEST_USER")"
-    sysadminctl -deleteUser "$TEST_USER" 2>&1 || true
+    delete_test_user
   fi
 }
 
