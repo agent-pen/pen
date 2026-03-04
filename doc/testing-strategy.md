@@ -104,42 +104,22 @@ setup_suite() {
 
 ## Executing commands as the test user
 
-The Apple Container apiserver is a per-user launch agent. It requires an active launchd user domain. Three candidate mechanisms, in order of preference:
+The Apple Container apiserver is a per-user launch agent. It requires an active launchd user domain. `launchctl asuser` sets the Mach bootstrap context; validated via `test/e2e/validate-oq1.sh`.
 
-### Option A: `launchctl asuser` (validated, recommended)
+### Execution model: full Mach context switch
 
+The entire bats test suite runs inside the test user's Mach context — not individual commands. This means pen, mitmdump, container CLI, and pfctl-wrapper all run natively as the test user, avoiding process context mismatches.
+
+The orchestrator (`test/run-e2e.sh`) invokes bats via:
 ```bash
-TEST_UID=$(id -u "$TEST_USER")
-run_as_test_user() {
-  sudo launchctl asuser "$TEST_UID" sudo -u "$TEST_USER" "$@"
-}
+sudo launchctl asuser "$TEST_UID" sudo -u "$TEST_USER" "$PEN_SOURCE/test/e2e-run.sh"
 ```
 
-This executes within the test user's launchd domain, allowing the apiserver to start on demand. Validated via `test/e2e/validate-oq1.sh`.
+Inside `e2e-run.sh`, PATH is set and bats is `exec`'d. Tests call `pen` directly — no wrappers needed.
 
-### Option B: SSH to localhost (fallback)
+For `install.sh`/`uninstall.sh` (which require `sudo`), the test user has scoped sudoers entries created by `e2e-setup.sh`. No blanket sudo — only the specific scripts are allowed, so unexpected sudo usage is caught.
 
-Set up an SSH keypair for the test user and connect via `ssh $TEST_USER@localhost <command>`. SSH fully initialises the launchd domain. Downside: requires `sshd` to be running and SSH key setup in the test harness.
-
-### Option C: `su -` with password (last resort)
-
-```bash
-echo "$TEST_PASSWORD" | sudo su - "$TEST_USER" -c "<command>"
-```
-
-Fragile across macOS versions. Not recommended.
-
-### Helper functions
-
-```bash
-pen_run() {
-  run_as_test_user bash -c "
-    cd $TEST_PROJECT && \
-    PATH=~/.local/bin:/usr/local/bin:/usr/bin:/bin \
-    pen \"\$@\"
-  " -- "$@"
-}
-```
+See `doc/plans/phase2b-test-execution-restructure.md` for the full design.
 
 ## Test runner: bats-core
 
@@ -149,24 +129,18 @@ pen_run() {
 
 ```
 test/
+  run-e2e.sh                    # Convenience: setup → run → teardown
+  e2e-setup.sh                  # Create test user, copy data, sudoers (runs as root)
+  e2e-run.sh                    # Export PATH, exec bats (runs as test user)
+  e2e-teardown.sh               # Delete test user, clean up (runs as root)
   e2e/
-    setup_suite.bash            # Suite-level: test user create/delete
-    helpers/
-      run_as.bash               # run_as_test_user, pen_run
-      assertions.bash           # assert_pf_anchor_exists, etc.
-    01_install.bats             # install.sh / per-user scoping
-    02_init.bats                # pen init
-    03_build.bats               # pen build
-    04_lifecycle.bats           # pen start / stop / status / restart
-    05_exec.bats                # pen exec
-    06_egress.bats              # Egress control, hot-reload
-    07_teardown.bats            # Cleanup verification
+    test_helper.bash            # assert_success, assert_output_contains
+    01_happy_path.bats          # Full lifecycle: install → exec → uninstall
     fixtures/
-      Dockerfile                # Minimal image for fast build tests
-  run-e2e.sh                    # Top-level runner
+      Dockerfile.minimal        # Minimal image for fast build tests
 ```
 
-Files are numbered to enforce execution order.
+Files are numbered to enforce execution order. The three-script split (`e2e-setup.sh` / `e2e-run.sh` / `e2e-teardown.sh`) enables a manual debugging workflow: run setup, drop into an interactive test user session, investigate, then teardown.
 
 ## Test scenarios
 
@@ -241,9 +215,14 @@ Caveats discovered during validation:
 - `container system start` is handled transparently by pen (via `ensure_container_system` in `common.sh`) using `--enable-kernel-install`, which is a no-op when the kernel is already present. To avoid the ~450MB kernel download on every test run, the test harness copies the kernel from the invoking user's `~/Library/Application Support/com.apple.container/kernels/` to the test user's equivalent directory before running any pen commands.
 - macOS may show a TCC "administer your computer" prompt when `sysadminctl` creates/deletes users from a terminal app. This appears intermittently (possibly related to script content changes). Clicking "Don't Allow" still allows the test to pass (with a `-14120` error logged). On headless CI runners this prompt does not appear.
 
-### OQ-2: Does the test user need specific macOS groups?
+### OQ-2: Does the test user need specific macOS groups? — PARTIALLY RESOLVED
 
-The test user does not call `sudo` directly. `install.sh` is run by the test harness via `sudo SUDO_USER="$TEST_USER"`. At runtime, the test user only needs `sudo` for `pfctl-wrapper.sh` (granted by the per-user sudoers entry that `install.sh` creates). This should work for a standard (non-admin) user, but needs verification.
+The test user calls `sudo` for three things, all via scoped NOPASSWD sudoers entries:
+1. `install.sh` — granted by `e2e-setup.sh`
+2. `uninstall.sh` — granted by `e2e-setup.sh`
+3. `pfctl-wrapper.sh` — granted by `install.sh` (runs as a test step)
+
+No admin group membership or blanket sudo required. Standard (non-admin) user should work, but needs verification.
 
 ### OQ-3: Docker Hub pulls during `pen build`
 
@@ -265,20 +244,22 @@ These tests require a macOS host with Apple Silicon, macOS Tahoe (26.x+), and th
 6. ~~Auto-start container system transparently via `ensure_container_system`~~
 7. Manual verification that two users can install pen on the same host (deferred to Phase 2)
 
-### Phase 2: Test infrastructure — NEXT
+### Phase 2: Test infrastructure — IN PROGRESS
 
-8. Install bats-core (`brew install bats-core`)
-9. Create `test/run-e2e.sh` — root-level orchestrator that creates the test user, runs bats, and tears down. This is the script that gets a sudoers entry for passwordless execution
-10. Create `test/e2e/setup_suite.bash` — bats suite-level hooks exporting helpers and variables (no user lifecycle — that's in `run-e2e.sh`)
-11. Create `development.sh` — one-time dev setup script (run with `sudo`) that adds the sudoers entry for `test/run-e2e.sh`. Separate from `install.sh`, which is for end users only
-12. ~~Validate OQ-1 (apiserver auto-start mechanism)~~
+8. ~~Install bats-core (`brew install bats-core`)~~
+9. ~~Create `test/run-e2e.sh` — root-level orchestrator~~
+10. ~~Create `develop.sh` — one-time dev setup script~~
+11. ~~Validate OQ-1 (apiserver auto-start mechanism)~~
+12. Restructure into `e2e-setup.sh` / `e2e-run.sh` / `e2e-teardown.sh` — see `doc/plans/phase2b-test-execution-restructure.md`
 
 Design decisions:
 
-- **`install.sh` / `uninstall.sh` are test scenarios, not infrastructure.** They run inside the happy-path test (`01_install.bats` etc.), not in suite setup. This exercises the full install path as a test.
-- **`run-e2e.sh` owns the test user lifecycle.** It creates the user, copies the container kernel, clones pen, and tears down after bats finishes. `setup_suite.bash` only exports helpers.
+- **`install.sh` / `uninstall.sh` are test scenarios, not infrastructure.** They run inside the happy-path test, not in suite setup. This exercises the full install path as a test.
+- **Bats runs in the test user's Mach context.** The entire test suite runs natively as the test user — no per-command `launchctl asuser` wrappers. This avoids process context mismatches (e.g., mitmdump failing to bind to vmnet interfaces).
+- **Scoped sudoers for the test user.** Only `install.sh` and `uninstall.sh` are allowed — not blanket sudo. Unexpected sudo usage in pen will be caught as a test failure.
+- **Three-script split enables debugging.** Run setup, drop into an interactive test user session, investigate, then teardown.
 - **No `-createHomeDirectory` flag.** `sysadminctl -addUser` without it, then `createhomedir -c -u` separately (the flag is unreliable).
-- **Passwordless execution via sudoers.** `development.sh` adds a per-user sudoers entry for `test/run-e2e.sh` so developers never type a password to run tests.
+- **Passwordless execution via sudoers.** `develop.sh` adds a per-user sudoers entry for test scripts so developers never type a password to run tests.
 
 ### Phase 3: Test scenarios (incremental)
 
