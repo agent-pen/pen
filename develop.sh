@@ -16,23 +16,36 @@ SUDOERS_FILE="/etc/sudoers.d/pen-dev-${REAL_UID}"
 
 if [[ "${1:-}" == "--undo" ]]; then
   rm -f "$SUDOERS_FILE"
-  chown "$REAL_USER:staff" "${PEN_HOME}/test/run-e2e.sh"
+  for script in test/run-e2e.sh test/e2e-setup.sh test/e2e-teardown.sh; do
+    chown "$REAL_USER:staff" "${PEN_HOME}/${script}"
+  done
   sudo -u "$REAL_USER" git -C "$PEN_HOME" config --unset core.hooksPath || true
   echo "Dev setup undone."
   exit 0
 fi
 
+echo "Installing runtime dependencies (brew bundle)..."
 sudo -u "$REAL_USER" env HOMEBREW_NO_AUTO_UPDATE=1 brew bundle --file="${PEN_HOME}/Brewfile"
+
+echo "Installing dev dependencies (brew bundle)..."
 sudo -u "$REAL_USER" env HOMEBREW_NO_AUTO_UPDATE=1 brew bundle --file="${PEN_HOME}/Brewfile.dev"
 
-chown root:wheel "${PEN_HOME}/test/run-e2e.sh"
-chmod 755 "${PEN_HOME}/test/run-e2e.sh"
+echo "Setting ownership on test scripts..."
+for script in test/run-e2e.sh test/e2e-setup.sh test/e2e-teardown.sh; do
+  chown root:wheel "${PEN_HOME}/${script}"
+  chmod 755 "${PEN_HOME}/${script}"
+done
 
-sudoers_line="${REAL_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/run-e2e.sh"
-echo "$sudoers_line" | tee "$SUDOERS_FILE" > /dev/null
+echo "Configuring sudoers for test scripts..."
+cat > "$SUDOERS_FILE" <<EOF
+${REAL_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/run-e2e.sh
+${REAL_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-setup.sh
+${REAL_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-teardown.sh
+EOF
 chmod 440 "$SUDOERS_FILE"
 visudo -cf "$SUDOERS_FILE" > /dev/null 2>&1
 
+echo "Configuring git hooks..."
 sudo -u "$REAL_USER" git -C "$PEN_HOME" config core.hooksPath .githooks
 
 echo "Dev setup complete."
