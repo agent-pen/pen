@@ -32,6 +32,8 @@ create_test_user() {
     -password "$password" \
     -home "/Users/$TEST_USER" 2>&1
 
+  echo $password
+
   # sysadminctl -createHomeDirectory is broken — use createhomedir instead.
   createhomedir -c -u "$TEST_USER" 2>&1
 
