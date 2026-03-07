@@ -104,7 +104,13 @@ This installs dev dependencies, configures passwordless sudo for the test runner
 Run end-to-end tests:
 
 ```bash
-sudo test/run-e2e.sh
+./test.sh
 ```
 
 Tests also run automatically via the git pre-commit hook.
+
+Debug interactively as the test user:
+
+```bash
+./test-user-shell.sh
+```

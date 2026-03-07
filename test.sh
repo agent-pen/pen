@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # E2E test wrapper: setup → run → teardown.
-# Usage: test/run-e2e.sh
+# Usage: ./test.sh
 
 set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-trap "$SCRIPT_DIR/e2e-teardown.sh" EXIT
+trap "$SCRIPT_DIR/test/e2e-teardown.sh" EXIT
 
-"$SCRIPT_DIR/e2e-setup.sh"
+"$SCRIPT_DIR/test/e2e-setup.sh"
 
-sudo "$SCRIPT_DIR/e2e-ops/privileged/run-test-suite.sh"
+sudo "$SCRIPT_DIR/test/e2e-ops/privileged/run-test-suite.sh"
