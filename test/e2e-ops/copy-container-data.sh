@@ -24,6 +24,14 @@ DST="/Users/$TARGET/$CONTAINER_BASE"
 
 verify_target_path "$DST"
 
+# Ensure the container base directory (and intermediates) are owned by the test
+# user so that `container system start` can create the apiserver socket there.
+mkdir -p "$DST"
+chown "$TARGET:staff" \
+  "/Users/$TARGET/Library" \
+  "/Users/$TARGET/Library/Application Support" \
+  "$DST"
+
 for subdir in kernels content; do
   if [[ -d "$SRC/$subdir" ]]; then
     mkdir -p "$DST/$subdir"
