@@ -14,5 +14,6 @@ source "$SCRIPT_DIR/test-user-guard.sh"
 
 TEST_USER="pen-e2e-test-user"
 PEN_REPO="/Users/$TEST_USER/pen-source"
+readonly TEST_USER PEN_REPO
 
 run_as_test_user "$TEST_USER" "$PEN_REPO/test/e2e-run.sh"

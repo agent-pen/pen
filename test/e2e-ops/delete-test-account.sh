@@ -15,6 +15,7 @@ source "$SCRIPT_DIR/test-user-guard.sh"
 
 TARGET="${1:?Usage: delete-test-account.sh <username>}"
 verify_target_user_and_uid "$TARGET"
+readonly TARGET
 
 if ! id "$TARGET" &>/dev/null; then
   exit 0

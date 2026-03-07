@@ -22,6 +22,7 @@ TEST_PROJECT="/Users/$TARGET/test-project"
 
 verify_target_path "$DEST"
 verify_target_path "$TEST_PROJECT"
+readonly SRC TARGET DEST TEST_PROJECT
 
 cp -R "$SRC" "$DEST"
 chown -R "$TARGET:staff" "$DEST"

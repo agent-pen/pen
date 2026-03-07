@@ -13,6 +13,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/test-user-guard.sh"
 
 TARGET="${1:?Usage: start-test-apiserver.sh <username>}"
+readonly TARGET
 
 # Restart to clear any stale networking state (e.g. pending network operations)
 # left over from a previous test user with the same name.

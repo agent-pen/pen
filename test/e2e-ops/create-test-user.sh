@@ -15,6 +15,7 @@ source "$SCRIPT_DIR/test-user-guard.sh"
 
 TEST_USER="pen-e2e-test-user"
 verify_target_user "$TEST_USER"
+readonly TEST_USER
 
 password="$(openssl rand -hex 16)"
 

@@ -17,9 +17,11 @@ TARGET="${1:?Usage: add-test-sudoers.sh <username> <pen-source-path>}"
 PEN_SOURCE="${2:?Usage: add-test-sudoers.sh <username> <pen-source-path>}"
 verify_target_user_and_uid "$TARGET"
 verify_target_path "$PEN_SOURCE"
+readonly TARGET PEN_SOURCE
 
 TARGET_UID="$(id -u "$TARGET")"
 SUDOERS_FILE="/etc/sudoers.d/pen-${TARGET_UID}-e2e-test"
+readonly TARGET_UID SUDOERS_FILE
 
 cat > "$SUDOERS_FILE" <<EOF
 $TARGET ALL=(root) NOPASSWD: $PEN_SOURCE/install.sh

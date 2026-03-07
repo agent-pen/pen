@@ -10,14 +10,17 @@
 #   run_as_test_user <username> [command]  — hand-off via launchctl + sudo -i
 
 _INVOKING_USER="${SUDO_USER:?must be run via sudo}"
+readonly _INVOKING_USER
 
 # Compose expected values from parts so a bulk find-and-replace of the full
 # username across the codebase cannot silently change these safety checks.
 _EXPECTED_USER=""
 printf -v _EXPECTED_USER '%s-%s' 'pen-e2e' 'test-user'
+readonly _EXPECTED_USER
 
 _EXPECTED_HOME=""
 printf -v _EXPECTED_HOME '/Users/%s-%s' 'pen-e2e' 'test-user'
+readonly _EXPECTED_HOME
 
 verify_target_user() {
   local target="$1"

@@ -15,6 +15,7 @@ source "$SCRIPT_DIR/test-user-guard.sh"
 
 TARGET="${1:?Usage: remove-test-sudoers.sh <username>}"
 verify_target_user_and_uid "$TARGET"
+readonly TARGET
 
 uid="$(id -u "$TARGET" 2>/dev/null || true)"
 if [[ -n "$uid" ]]; then

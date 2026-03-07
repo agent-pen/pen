@@ -23,6 +23,7 @@ SRC="$SUDO_USER_HOME/$CONTAINER_BASE"
 DST="/Users/$TARGET/$CONTAINER_BASE"
 
 verify_target_path "$DST"
+readonly TARGET SUDO_USER_HOME CONTAINER_BASE SRC DST
 
 # Ensure the container base directory (and intermediates) are owned by the test
 # user so that `container system start` can create the apiserver socket there.
