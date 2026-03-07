@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# E2E setup: create test user, configure environment.
-# Usage: test/e2e-setup.sh
+# Test setup: create test user, configure environment.
+# Usage: test/setup.sh
 
 set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "Cleaning up any leftover test user..."
-"$SCRIPT_DIR/e2e-ops/delete-test-user.sh"
+"$SCRIPT_DIR/ops/delete-test-user.sh"
 
 echo "Creating test user..."
-sudo "$SCRIPT_DIR/e2e-ops/privileged/create-test-user.sh"
+sudo "$SCRIPT_DIR/ops/privileged/create-test-user.sh"
 
 echo "Configuring test environment..."
-"$SCRIPT_DIR/e2e-ops/configure-test-env.sh"
+"$SCRIPT_DIR/ops/configure-test-env.sh"
 
 echo ""
 echo "Setup complete."
 echo "To debug interactively:"
-echo "  sudo $SCRIPT_DIR/e2e-ops/privileged/shell-test-user.sh"
+echo "  sudo $SCRIPT_DIR/ops/privileged/shell-test-user.sh"

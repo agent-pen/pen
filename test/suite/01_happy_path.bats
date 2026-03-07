@@ -15,7 +15,7 @@ setup() {
 }
 
 @test "pen build with fixture Dockerfile" {
-  cp "$PEN_REPO/test/e2e/fixtures/Dockerfile.minimal" .pen/Dockerfile
+  cp "$PEN_REPO/test/suite/fixtures/Dockerfile.minimal" .pen/Dockerfile
   run pen build
   assert_success
 }
