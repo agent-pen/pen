@@ -10,6 +10,7 @@ if [[ "$(id -u)" -ne 0 ]]; then
 fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 source "$SCRIPT_DIR/test-user-guard.sh"
 
 TARGET="${1:?Usage: add-test-sudoers.sh <username> <pen-source-path>}"

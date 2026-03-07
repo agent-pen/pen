@@ -10,6 +10,7 @@ if [[ "$(id -u)" -ne 0 ]]; then
 fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 source "$SCRIPT_DIR/test-user-guard.sh"
 
 SRC="${1:?Usage: copy-pen-source.sh <source-path> <username>}"
@@ -24,4 +25,5 @@ verify_target_path "$TEST_PROJECT"
 
 cp -R "$SRC" "$DEST"
 chown -R "$TARGET:staff" "$DEST"
-sudo -i -u "$TARGET" mkdir -p "$TEST_PROJECT"
+mkdir -p "$TEST_PROJECT"
+chown "$TARGET:staff" "$TEST_PROJECT"

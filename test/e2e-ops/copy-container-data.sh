@@ -11,6 +11,7 @@ if [[ "$(id -u)" -ne 0 ]]; then
 fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 source "$SCRIPT_DIR/test-user-guard.sh"
 
 TARGET="${1:?Usage: copy-container-data.sh <username>}"
@@ -25,7 +26,8 @@ verify_target_path "$DST"
 
 for subdir in kernels content; do
   if [[ -d "$SRC/$subdir" ]]; then
-    sudo -i -u "$TARGET" mkdir -p "$DST/$subdir"
+    mkdir -p "$DST/$subdir"
+    chown "$TARGET:staff" "$DST/$subdir"
     cp -R "$SRC/$subdir"/* "$DST/$subdir"/
     find "$DST/$subdir" -type l | while read -r link; do
       local_target="$(readlink "$link")"

@@ -263,6 +263,24 @@ Design decisions:
 - **No `-createHomeDirectory` flag.** `sysadminctl -addUser` without it, then `createhomedir -c -u` separately (the flag is unreliable).
 - **Passwordless execution via sudoers.** `develop.sh` adds a per-user sudoers entry for test scripts so developers never type a password to run tests.
 
+### Sandbox hardening — abandoned
+
+We investigated using macOS `sandbox-exec` (Seatbelt) to restrict what privileged e2e test scripts can write to, as defense-in-depth on top of `root:wheel` ownership and guard functions. The approach was for leaf scripts to re-exec themselves under `sandbox-exec` with a profile that denied file writes outside expected targets.
+
+**Approaches tried:**
+
+1. **Parameterised profile** — `(deny file-write* (subpath (param "DENY_HOME")))` with `-D DENY_HOME=/Users/$SUDO_USER`. Failed because XPC services (e.g. `trustd`) inherit the sandbox profile but NOT the `-D` parameter bindings. `(param "DENY_HOME")` resolves to empty string in the inherited context, causing `(subpath "")` to deny all file writes system-wide.
+
+2. **Hardcoded paths, three profiles** — eliminated `-D` params entirely. Three profiles with increasing scope: deny-all-writes-except-test-user-home, deny-all-writes-except-sudoers, deny-writes-under-/Users. Even with hardcoded allow rules for `/Users/pen-e2e-test-user`, `trustd` was still denied writes to the test user's keychain. The inherited profile appears to lose allow overrides or interact unpredictably with the service's own sandbox. Additionally, `(deny file-write*)` blocks `/dev/null`, pipes, and temp dirs, requiring a large system-path allowlist.
+
+**Root cause:** macOS XPC services inherit Seatbelt profiles from their clients. This is undocumented, unpredictable, and makes it impossible to sandbox scripts that trigger system services (user creation, certificate validation, container apiserver) without breaking those services.
+
+**Existing mitigations (sufficient for test scripts):**
+- `root:wheel` ownership on all leaf scripts and `test-user-guard.sh` — prevents unprivileged tampering
+- `verify_target_user` / `verify_target_path` guards — prevent operating on wrong user or path
+- Scoped sudoers — only specific scripts can run as root, no blanket sudo
+- Hardcoded test username composed from parts — resistant to bulk find-and-replace attacks
+
 ### Phase 3: Test scenarios (incremental)
 
 Start with a single happy-path test covering the full journey (install, build, start, exec, uninstall), then extend with scenario-specific tests (e.g. network control).
