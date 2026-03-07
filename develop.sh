@@ -10,50 +10,32 @@ CURRENT_UID="$(id -u)"
 SUDOERS_FILE="/etc/sudoers.d/pen-dev-${CURRENT_UID}"
 
 UNDO="${1:-}"
-
-PRIVILEGED_SCRIPTS=(
-  test/e2e-ops/test-user-guard.sh
-  test/e2e-ops/create-test-user.sh
-  test/e2e-ops/run-test-suite.sh
-  test/e2e-ops/shell-test-user.sh
-  test/e2e-ops/remove-test-sudoers.sh
-  test/e2e-ops/delete-test-account.sh
-  test/e2e-ops/copy-container-data.sh
-  test/e2e-ops/start-test-apiserver.sh
-  test/e2e-ops/copy-pen-source.sh
-  test/e2e-ops/add-test-sudoers.sh
-)
+PRIVILEGED_DIR="${PEN_HOME}/test/e2e-ops/privileged"
 
 if [[ "$UNDO" == "--undo" ]]; then
   echo "Removing sudoers for privileged test scripts..."
   sudo rm -f "$SUDOERS_FILE"
 else
   echo "Configuring sudoers for privileged test scripts..."
-  sudo tee "$SUDOERS_FILE" > /dev/null <<EOF
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/create-test-user.sh
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/run-test-suite.sh
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/shell-test-user.sh
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/remove-test-sudoers.sh *
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/delete-test-account.sh *
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/copy-container-data.sh *
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/start-test-apiserver.sh *
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/copy-pen-source.sh * *
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/add-test-sudoers.sh * *
-EOF
+  sudoers_lines=""
+  for script in "$PRIVILEGED_DIR"/*.sh; do
+    sudoers_lines+="${CURRENT_USER} ALL=(root) NOPASSWD: ${script} *"$'\n'
+  done
+  echo "$sudoers_lines" | sudo tee "$SUDOERS_FILE" > /dev/null
   sudo chmod 440 "$SUDOERS_FILE"
   sudo visudo -cf "$SUDOERS_FILE" > /dev/null 2>&1
 fi
 
 if [[ "$UNDO" == "--undo" ]]; then
   echo "Resetting ownership on privileged test scripts..."
-  for script in "${PRIVILEGED_SCRIPTS[@]}"; do
-    sudo chown "$CURRENT_USER:staff" "${PEN_HOME}/${script}"
+  for script in "$PRIVILEGED_DIR"/*.sh; do
+    sudo chown "$CURRENT_USER:staff" "$script"
   done
 else
   echo "Setting ownership on privileged test scripts..."
-  for script in "${PRIVILEGED_SCRIPTS[@]}"; do
-    sudo chown root:wheel "${PEN_HOME}/${script}"
-    sudo chmod 755 "${PEN_HOME}/${script}"
+  for script in "$PRIVILEGED_DIR"/*.sh; do
+    sudo chown root:wheel "$script"
+    sudo chmod 755 "$script"
   done
 fi
 

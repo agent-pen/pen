@@ -9,9 +9,9 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PEN_REPO_SRC="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
 TEST_USER="pen-e2e-test-user"
 
-sudo "$SCRIPT_DIR/copy-container-data.sh" "$TEST_USER"
-sudo "$SCRIPT_DIR/start-test-apiserver.sh" "$TEST_USER"
-sudo "$SCRIPT_DIR/copy-pen-source.sh" "$PEN_REPO_SRC" "$TEST_USER"
-sudo "$SCRIPT_DIR/add-test-sudoers.sh" "$TEST_USER" "/Users/$TEST_USER/pen-source"
+sudo "$SCRIPT_DIR/privileged/copy-container-data.sh" "$TEST_USER"
+sudo "$SCRIPT_DIR/privileged/start-test-apiserver.sh" "$TEST_USER"
+sudo "$SCRIPT_DIR/privileged/copy-pen-source.sh" "$PEN_REPO_SRC" "$TEST_USER"
+sudo "$SCRIPT_DIR/privileged/add-test-sudoers.sh" "$TEST_USER" "/Users/$TEST_USER/pen-source"
 
 echo "Test environment configured."

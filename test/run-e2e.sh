@@ -10,4 +10,4 @@ trap "$SCRIPT_DIR/e2e-teardown.sh" EXIT
 
 "$SCRIPT_DIR/e2e-setup.sh"
 
-sudo "$SCRIPT_DIR/e2e-ops/run-test-suite.sh"
+sudo "$SCRIPT_DIR/e2e-ops/privileged/run-test-suite.sh"

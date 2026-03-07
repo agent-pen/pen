@@ -11,5 +11,5 @@ if ! id "$TEST_USER" &>/dev/null; then
   exit 0
 fi
 
-sudo "$SCRIPT_DIR/remove-test-sudoers.sh" "$TEST_USER"
-sudo "$SCRIPT_DIR/delete-test-account.sh" "$TEST_USER"
+sudo "$SCRIPT_DIR/privileged/remove-test-sudoers.sh" "$TEST_USER"
+sudo "$SCRIPT_DIR/privileged/delete-test-account.sh" "$TEST_USER"

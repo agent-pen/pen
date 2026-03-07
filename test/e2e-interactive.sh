@@ -12,6 +12,6 @@ echo ""
 echo "Entering interactive session as pen-e2e-test-user. Exit the shell to tear down."
 echo ""
 
-sudo "$SCRIPT_DIR/e2e-ops/shell-test-user.sh" || true
+sudo "$SCRIPT_DIR/e2e-ops/privileged/shell-test-user.sh" || true
 
 "$SCRIPT_DIR/e2e-teardown.sh"
