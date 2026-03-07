@@ -6,6 +6,6 @@ set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-sudo "$SCRIPT_DIR/e2e-ops/delete-test-user.sh"
+"$SCRIPT_DIR/e2e-ops/delete-test-user.sh"
 
 echo "Teardown complete."

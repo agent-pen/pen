@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Create the e2e test user. Prints the new user's UID to stdout.
-# Must be run as root.
+# Must be run as root via sudo.
 
 set -o nounset -o errexit -o pipefail
 
@@ -9,7 +9,11 @@ if [[ "$(id -u)" -ne 0 ]]; then
   exit 1
 fi
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/test-user-guard.sh"
+
 TEST_USER="pen-e2e-test-user"
+verify_target_user "$TEST_USER"
 
 password="$(openssl rand -hex 16)"
 

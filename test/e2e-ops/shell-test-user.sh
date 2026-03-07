@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Drop into an interactive login shell as the test user in their Mach context.
-# Must be run as root.
+# Must be run as root via sudo.
 
 set -o nounset -o errexit -o pipefail
 
@@ -9,7 +9,9 @@ if [[ "$(id -u)" -ne 0 ]]; then
   exit 1
 fi
 
-TEST_USER="pen-e2e-test-user"
-TEST_UID="$(id -u "$TEST_USER")"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/test-user-guard.sh"
 
-launchctl asuser "$TEST_UID" sudo -i -u "$TEST_USER"
+TEST_USER="pen-e2e-test-user"
+
+run_as_test_user "$TEST_USER"

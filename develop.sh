@@ -11,7 +11,7 @@ SUDOERS_FILE="/etc/sudoers.d/pen-dev-${CURRENT_UID}"
 
 if [[ "${1:-}" == "--undo" ]]; then
   sudo rm -f "$SUDOERS_FILE"
-  for script in test/e2e-ops/create-test-user.sh test/e2e-ops/delete-test-user.sh test/e2e-ops/configure-test-env.sh test/e2e-ops/run-test-suite.sh test/e2e-ops/shell-test-user.sh; do
+  for script in test/e2e-ops/test-user-guard.sh test/e2e-ops/create-test-user.sh test/e2e-ops/run-test-suite.sh test/e2e-ops/shell-test-user.sh test/e2e-ops/remove-test-sudoers.sh test/e2e-ops/delete-test-account.sh test/e2e-ops/copy-container-data.sh test/e2e-ops/start-test-apiserver.sh test/e2e-ops/copy-pen-source.sh test/e2e-ops/add-test-sudoers.sh; do
     sudo chown "$CURRENT_USER:staff" "${PEN_HOME}/${script}"
   done
   git -C "$PEN_HOME" config --unset core.hooksPath || true
@@ -26,7 +26,7 @@ echo "Installing dev dependencies (brew bundle)..."
 env HOMEBREW_NO_AUTO_UPDATE=1 brew bundle --file="${PEN_HOME}/Brewfile.dev"
 
 echo "Setting ownership on privileged test scripts..."
-for script in test/e2e-ops/create-test-user.sh test/e2e-ops/delete-test-user.sh test/e2e-ops/configure-test-env.sh test/e2e-ops/run-test-suite.sh test/e2e-ops/shell-test-user.sh; do
+for script in test/e2e-ops/test-user-guard.sh test/e2e-ops/create-test-user.sh test/e2e-ops/run-test-suite.sh test/e2e-ops/shell-test-user.sh test/e2e-ops/remove-test-sudoers.sh test/e2e-ops/delete-test-account.sh test/e2e-ops/copy-container-data.sh test/e2e-ops/start-test-apiserver.sh test/e2e-ops/copy-pen-source.sh test/e2e-ops/add-test-sudoers.sh; do
   sudo chown root:wheel "${PEN_HOME}/${script}"
   sudo chmod 755 "${PEN_HOME}/${script}"
 done
@@ -34,10 +34,14 @@ done
 echo "Configuring sudoers for privileged test scripts..."
 sudo tee "$SUDOERS_FILE" > /dev/null <<EOF
 ${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/create-test-user.sh
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/delete-test-user.sh
-${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/configure-test-env.sh
 ${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/run-test-suite.sh
 ${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/shell-test-user.sh
+${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/remove-test-sudoers.sh *
+${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/delete-test-account.sh *
+${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/copy-container-data.sh *
+${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/start-test-apiserver.sh *
+${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/copy-pen-source.sh * *
+${CURRENT_USER} ALL=(root) NOPASSWD: ${PEN_HOME}/test/e2e-ops/add-test-sudoers.sh * *
 EOF
 sudo chmod 440 "$SUDOERS_FILE"
 sudo visudo -cf "$SUDOERS_FILE" > /dev/null 2>&1
