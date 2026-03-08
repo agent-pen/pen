@@ -10,6 +10,6 @@ TEST_USER="${1:?Usage: configure-test-env.sh <username>}"
 
 sudo "$SCRIPT_DIR/privileged/copy-container-data.sh" "$TEST_USER"
 sudo "$SCRIPT_DIR/privileged/copy-pen-source.sh" "$TEST_USER"
-sudo "$SCRIPT_DIR/privileged/add-test-sudoers.sh" "$TEST_USER" "/Users/$TEST_USER/pen-source"
+sudo "$SCRIPT_DIR/privileged/add-test-sudoers.sh" "$TEST_USER"
 
 echo "Test environment configured."

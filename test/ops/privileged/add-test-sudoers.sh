@@ -13,9 +13,10 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 source "$SCRIPT_DIR/test-user-guard.sh"
 
-TARGET="${1:?Usage: add-test-sudoers.sh <username> <pen-source-path>}"
-PEN_SOURCE="${2:?Usage: add-test-sudoers.sh <username> <pen-source-path>}"
+TARGET="${1:?Usage: add-test-sudoers.sh <username>}"
 verify_target_user_and_uid "$TARGET"
+
+PEN_SOURCE="/Users/$TARGET/pen-source"
 verify_target_path "$PEN_SOURCE"
 readonly TARGET PEN_SOURCE
 
