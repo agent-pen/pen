@@ -20,7 +20,7 @@ verify_target_path "$PEN_SOURCE"
 readonly TARGET PEN_SOURCE
 
 TARGET_UID="$(id -u "$TARGET")"
-SUDOERS_FILE="/etc/sudoers.d/pen-${TARGET_UID}-e2e-test"
+SUDOERS_FILE="/etc/sudoers.d/pen-${TARGET_UID}-test"
 readonly TARGET_UID SUDOERS_FILE
 
 cat > "$SUDOERS_FILE" <<EOF

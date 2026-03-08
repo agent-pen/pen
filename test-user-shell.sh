@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 "$SCRIPT_DIR/test/setup.sh"
 
 echo ""
-echo "Entering interactive session as pen-e2e-test-user. Exit the shell to tear down."
+echo "Entering interactive session as pen-test-user. Exit the shell to tear down."
 echo ""
 
 sudo "$SCRIPT_DIR/test/ops/privileged/shell-test-user.sh" || true

@@ -22,6 +22,12 @@ After tests complete, the temporary user and all its state are torn down.
 
 Confirmed: the `container` CLI stores all data under `~/Library/Application Support/com.apple.container/` and runs a per-user launch agent (`com.apple.container.apiserver`). Images, containers, networks, and volumes are scoped to the calling macOS user. The test user gets a completely separate container environment with no visibility into the developer's containers.
 
+### Apiserver in-memory state survives user deletion
+
+The container apiserver (`com.apple.container.apiserver`) is a per-user launchd service that caches state in memory keyed by UID. When a macOS user is deleted and recreated at the same UID (which macOS does by default — it assigns the next available), the apiserver retains stale in-memory state from the old username. This causes `container system start` to hang indefinitely for the new user.
+
+**A reboot clears this state.** Changing the test username requires a reboot before tests will pass. This is a macOS container runtime quirk — the state does not persist on disk (no leftover files in `/private/var/run/` or `/private/var/db/`), it is purely in the launchd service's memory.
+
 ## System-wide touchpoints — RESOLVED
 
 Both system-wide conflicts have been resolved:

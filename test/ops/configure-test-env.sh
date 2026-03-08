@@ -7,7 +7,7 @@ set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PEN_REPO_SRC="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
-TEST_USER="pen-e2e-test-user"
+TEST_USER="pen-test-user"
 
 sudo "$SCRIPT_DIR/privileged/copy-container-data.sh" "$TEST_USER"
 sudo "$SCRIPT_DIR/privileged/start-test-apiserver.sh" "$TEST_USER"

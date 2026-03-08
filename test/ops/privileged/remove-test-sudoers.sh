@@ -19,6 +19,6 @@ readonly TARGET
 
 uid="$(id -u "$TARGET" 2>/dev/null || true)"
 if [[ -n "$uid" ]]; then
-  rm -f "/etc/sudoers.d/pen-${uid}-e2e-test"
+  rm -f "/etc/sudoers.d/pen-${uid}-test"
   rm -f "/etc/sudoers.d/pen-${uid}"
 fi
