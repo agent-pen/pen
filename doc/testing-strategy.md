@@ -81,13 +81,7 @@ The test user does not need to be an admin. `install.sh` and `uninstall.sh` requ
    sudo -u "$TEST_USER" git clone --local "$(pwd)" "/Users/$TEST_USER/pen"
    ```
 
-2. Ensure `~/.local/bin` is on the test user's PATH:
-   ```bash
-   sudo -u "$TEST_USER" bash -c '
-     mkdir -p ~/.local/bin
-     echo "export PATH=\$HOME/.local/bin:\$PATH" >> ~/.zprofile
-   '
-   ```
+2. The test user's `.zprofile` is created by `create-test-user.sh` with `$HOME/.local/bin` and `/opt/homebrew/bin` on PATH.
 
 3. Run `install.sh` as the test user (exercises the full install path):
    ```bash
@@ -124,14 +118,27 @@ The Apple Container apiserver is a per-user launch agent. It requires an active 
 
 The entire bats test suite runs inside the test user's Mach context — not individual commands. This means pen, mitmdump, container CLI, and pfctl-wrapper all run natively as the test user, avoiding process context mismatches.
 
-The orchestrator (`test/run-e2e.sh`) invokes bats via:
+All test user hand-offs go through `run_as_test_user` in `test-user-guard.sh`:
 ```bash
-sudo launchctl asuser "$TEST_UID" sudo -u "$TEST_USER" "$PEN_SOURCE/test/e2e-run.sh"
+launchctl asuser "$target_uid" env -i TERM="$TERM" LANG="$LANG" sudo -i -u "$target" "$@"
 ```
 
-Inside `e2e-run.sh`, PATH is set and bats is `exec`'d. Tests call `pen` directly — no wrappers needed.
+`env -i` strips the dev user's environment to prevent leakage (e.g. PATH, editor settings, Homebrew env vars). Only `TERM` (terminal type) and `LANG` (locale) are passed through — both are needed for correct interactive terminal behaviour and are non-sensitive. `sudo -i` then rebuilds the environment from the test user's login shell profile.
 
-For `install.sh`/`uninstall.sh` (which require `sudo`), the test user has scoped sudoers entries created by `e2e-setup.sh`. No blanket sudo — only the specific scripts are allowed, so unexpected sudo usage is caught.
+### Test user shell profile
+
+`create-test-user.sh` writes a `.zprofile` for the test user:
+```bash
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+```
+
+This is necessary because `/etc/paths.d/` on macOS has no Homebrew entry — `path_helper` alone won't find `bats` or `pen`. Previously the test runner (`test/run.sh`) prepended `$HOME/.local/bin` to PATH inline, but this didn't help the interactive debugging shell and masked the missing Homebrew path (which only worked via env leakage from the dev user).
+
+### Sudoers for test scripts
+
+`develop.sh` grants the dev user NOPASSWD sudo for all scripts in `test/ops/privileged/`. Only those scripts can be `sudo`'d without a password — arbitrary commands like `sudo tee` will fail in non-interactive contexts (e.g. pre-commit hooks). New privileged operations must be implemented as leaf scripts in that directory.
+
+For `install.sh`/`uninstall.sh` (which require `sudo`), the test user has scoped sudoers entries created by `add-test-sudoers.sh`. No blanket sudo — only the specific scripts are allowed, so unexpected sudo usage is caught.
 
 See `doc/plans/phase2b-test-execution-restructure.md` for the full design.
 
