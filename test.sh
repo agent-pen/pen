@@ -11,4 +11,4 @@ source "$SCRIPT_DIR/test/test.env"
 trap "$SCRIPT_DIR/test/teardown.sh $TEST_USER" EXIT
 
 "$SCRIPT_DIR/test/setup.sh" "$TEST_USER"
-sudo "$SCRIPT_DIR/test/ops/privileged/run-test-suite.sh" "$TEST_USER"
+sudo "$SCRIPT_DIR/test/libs/privileged/run-test-suite.sh" "$TEST_USER"

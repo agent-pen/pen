@@ -16,4 +16,4 @@ echo ""
 echo "Entering interactive session as $TEST_USER. Exit the shell to tear down."
 echo ""
 
-sudo "$SCRIPT_DIR/test/ops/privileged/shell-test-user.sh" "$TEST_USER" || true
+sudo "$SCRIPT_DIR/test/libs/privileged/shell-test-user.sh" "$TEST_USER" || true

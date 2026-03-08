@@ -10,7 +10,7 @@ CURRENT_UID="$(id -u)"
 SUDOERS_FILE="/etc/sudoers.d/pen-dev-${CURRENT_UID}"
 
 UNDO="${1:-}"
-PRIVILEGED_DIR="${PEN_HOME}/test/ops/privileged"
+PRIVILEGED_DIR="${PEN_HOME}/test/libs/privileged"
 
 if [[ "$UNDO" == "--undo" ]]; then
   echo "Removing sudoers for privileged test scripts..."

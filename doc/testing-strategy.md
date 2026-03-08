@@ -136,7 +136,7 @@ This is necessary because `/etc/paths.d/` on macOS has no Homebrew entry — `pa
 
 ### Sudoers for test scripts
 
-`develop.sh` grants the dev user NOPASSWD sudo for all scripts in `test/ops/privileged/`. Only those scripts can be `sudo`'d without a password — arbitrary commands like `sudo tee` will fail in non-interactive contexts (e.g. pre-commit hooks). New privileged operations must be implemented as leaf scripts in that directory.
+`develop.sh` grants the dev user NOPASSWD sudo for all scripts in `test/libs/privileged/`. Only those scripts can be `sudo`'d without a password — arbitrary commands like `sudo tee` will fail in non-interactive contexts (e.g. pre-commit hooks). New privileged operations must be implemented as leaf scripts in that directory.
 
 For `install.sh`/`uninstall.sh` (which require `sudo`), the test user has scoped sudoers entries created by `add-test-sudoers.sh`. No blanket sudo — only the specific scripts are allowed, so unexpected sudo usage is caught.
 
