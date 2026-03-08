@@ -5,7 +5,7 @@
 set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/test-user-guard.sh"
+source "$SCRIPT_DIR/target-user-guards.sh"
 require_root
 
 TEST_USER="${1:?Usage: shell-test-user.sh <username>}"

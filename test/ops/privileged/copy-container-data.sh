@@ -7,18 +7,18 @@ set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-source "$SCRIPT_DIR/test-user-guard.sh"
+source "$SCRIPT_DIR/target-user-guards.sh"
 require_root
 
 TARGET="${1:?Usage: copy-container-data.sh <username>}"
-verify_target_user_and_uid "$TARGET"
+ensure_correct_target_user_and_uid "$TARGET"
 
 SUDO_USER_HOME="/Users/${SUDO_USER:?must be run via sudo}"
 CONTAINER_BASE="Library/Application Support/com.apple.container"
 SRC="$SUDO_USER_HOME/$CONTAINER_BASE"
 DST="/Users/$TARGET/$CONTAINER_BASE"
 
-verify_target_path "$DST"
+ensure_correct_target_path "$DST"
 readonly TARGET SUDO_USER_HOME CONTAINER_BASE SRC DST
 
 mkdir -p "$DST"

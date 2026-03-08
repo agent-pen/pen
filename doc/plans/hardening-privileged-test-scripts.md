@@ -10,17 +10,17 @@ The e2e test scripts run as root via sudo. A bug or malicious edit could cause t
 
 ### 1. root:wheel ownership on leaf scripts — IMPLEMENTED
 
-`develop.sh` chowns all leaf scripts and `test-user-guard.sh` to `root:wheel`. Since sudoers entries reference these scripts by path, an unprivileged user cannot modify them. This prevents tampering with scripts that run as root.
+`develop.sh` chowns all leaf scripts and `target-user-guards.sh` to `root:wheel`. Since sudoers entries reference these scripts by path, an unprivileged user cannot modify them. This prevents tampering with scripts that run as root.
 
 Limitation: only protects against modification of the scripts themselves, not against bugs in their logic.
 
 ### 2. Verification guard functions — IMPLEMENTED
 
-`test-user-guard.sh` (root:wheel owned, sourced by all leaf scripts) provides:
+`target-user-guards.sh` (root:wheel owned, sourced by all leaf scripts) provides:
 
-- `verify_target_user` — checks the target username matches the expected hardcoded value (`pen-e2e-test-user`, composed from parts to resist bulk find-and-replace)
-- `verify_target_user_and_uid` — additionally checks the target UID differs from the invoking user's UID
-- `verify_target_path` — checks the path is under `/Users/pen-e2e-test-user` and does not contain the invoking user's name
+- `ensure_correct_target_user` — checks the target username matches the expected hardcoded value (`pen-e2e-test-user`, composed from parts to resist bulk find-and-replace)
+- `ensure_correct_target_user_and_uid` — additionally checks the target UID differs from the invoking user's UID
+- `ensure_correct_target_path` — checks the path is under `/Users/pen-e2e-test-user` and does not contain the invoking user's name
 - `run_as_test_user` — centralised hand-off via `launchctl asuser` + `sudo -i -u`, with guard checks
 
 These are runtime checks that catch logic errors before dangerous operations execute.

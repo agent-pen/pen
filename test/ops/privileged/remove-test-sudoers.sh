@@ -6,11 +6,11 @@ set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-source "$SCRIPT_DIR/test-user-guard.sh"
+source "$SCRIPT_DIR/target-user-guards.sh"
 require_root
 
 TARGET="${1:?Usage: remove-test-sudoers.sh <username>}"
-verify_target_user_and_uid "$TARGET"
+ensure_correct_target_user_and_uid "$TARGET"
 readonly TARGET
 
 uid="$(id -u "$TARGET" 2>/dev/null || true)"

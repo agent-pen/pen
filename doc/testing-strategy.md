@@ -118,7 +118,7 @@ The Apple Container apiserver is a per-user launch agent. It requires an active 
 
 The entire bats test suite runs inside the test user's Mach context — not individual commands. This means pen, mitmdump, container CLI, and pfctl-wrapper all run natively as the test user, avoiding process context mismatches.
 
-All test user hand-offs go through `run_as_test_user` in `test-user-guard.sh`:
+All test user hand-offs go through `run_as_test_user` in `target-user-guards.sh`:
 ```bash
 launchctl asuser "$target_uid" env -i TERM="$TERM" LANG="$LANG" sudo -i -u "$target" "$@"
 ```
@@ -297,8 +297,8 @@ We investigated using macOS `sandbox-exec` (Seatbelt) to restrict what privilege
 **Root cause:** macOS XPC services inherit Seatbelt profiles from their clients. This is undocumented, unpredictable, and makes it impossible to sandbox scripts that trigger system services (user creation, certificate validation, container apiserver) without breaking those services.
 
 **Existing mitigations (sufficient for test scripts):**
-- `root:wheel` ownership on all leaf scripts and `test-user-guard.sh` — prevents unprivileged tampering
-- `verify_target_user` / `verify_target_path` guards — prevent operating on wrong user or path
+- `root:wheel` ownership on all leaf scripts and `target-user-guards.sh` — prevents unprivileged tampering
+- `ensure_correct_target_user` / `ensure_correct_target_path` guards — prevent operating on wrong user or path
 - Scoped sudoers — only specific scripts can run as root, no blanket sudo
 - Hardcoded test username composed from parts — resistant to bulk find-and-replace attacks
 
