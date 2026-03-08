@@ -8,6 +8,8 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 source "$SCRIPT_DIR/test/test.env"
 
+trap "$SCRIPT_DIR/test/teardown.sh $TEST_USER" EXIT
+
 "$SCRIPT_DIR/test/setup.sh" "$TEST_USER"
 
 echo ""
@@ -15,5 +17,3 @@ echo "Entering interactive session as $TEST_USER. Exit the shell to tear down."
 echo ""
 
 sudo "$SCRIPT_DIR/test/ops/privileged/shell-test-user.sh" "$TEST_USER" || true
-
-"$SCRIPT_DIR/test/teardown.sh" "$TEST_USER"
