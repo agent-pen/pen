@@ -17,17 +17,20 @@ TEST_USER="${1:?Usage: create-test-user.sh <username>}"
 verify_target_user "$TEST_USER"
 readonly TEST_USER
 
-password="$(openssl rand -hex 16)"
+create_account() {
+  local password
+  password="$(openssl rand -hex 16)"
 
-# FDE (FileVault) warning is expected — suppressing it requires admin credentials
-# which we don't have non-interactively. The test user doesn't need FDE.
-sysadminctl -addUser "$TEST_USER" \
-  -fullName "pen test user" \
-  -password "$password" \
-  -home "/Users/$TEST_USER" >&2
+  # FDE (FileVault) warning is expected — suppressing it requires admin credentials
+  # which we don't have non-interactively. The test user doesn't need FDE.
+  sysadminctl -addUser "$TEST_USER" \
+    -fullName "pen test user" \
+    -password "$password" \
+    -home "/Users/$TEST_USER" >&2
 
-# sysadminctl -createHomeDirectory is broken — use createhomedir instead.
-createhomedir -c -u "$TEST_USER" >&2
+  # sysadminctl -createHomeDirectory is broken — use createhomedir instead.
+  createhomedir -c -u "$TEST_USER" >&2
+}
 
 configure_shell_profile() {
   local home="/Users/$TEST_USER"
@@ -37,6 +40,7 @@ PROFILE
   chown "$TEST_USER" "$home/.zprofile"
 }
 
+create_account
 configure_shell_profile
 
 id -u "$TEST_USER"
