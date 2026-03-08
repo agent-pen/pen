@@ -5,7 +5,7 @@
 set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-TEST_USER="pen-test-user"
+TEST_USER="${1:?Usage: delete-test-user.sh <username>}"
 
 if ! id "$TEST_USER" &>/dev/null; then
   exit 0

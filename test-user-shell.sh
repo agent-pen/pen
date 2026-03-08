@@ -6,12 +6,14 @@ set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-"$SCRIPT_DIR/test/setup.sh"
+source "$SCRIPT_DIR/test/test.env"
+
+"$SCRIPT_DIR/test/setup.sh" "$TEST_USER"
 
 echo ""
-echo "Entering interactive session as pen-test-user. Exit the shell to tear down."
+echo "Entering interactive session as $TEST_USER. Exit the shell to tear down."
 echo ""
 
-sudo "$SCRIPT_DIR/test/ops/privileged/shell-test-user.sh" || true
+sudo "$SCRIPT_DIR/test/ops/privileged/shell-test-user.sh" "$TEST_USER" || true
 
-"$SCRIPT_DIR/test/teardown.sh"
+"$SCRIPT_DIR/test/teardown.sh" "$TEST_USER"

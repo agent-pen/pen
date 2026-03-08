@@ -6,8 +6,9 @@ set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-trap "$SCRIPT_DIR/test/teardown.sh" EXIT
+source "$SCRIPT_DIR/test/test.env"
 
-"$SCRIPT_DIR/test/setup.sh"
+trap "$SCRIPT_DIR/test/teardown.sh $TEST_USER" EXIT
 
-sudo "$SCRIPT_DIR/test/ops/privileged/run-test-suite.sh"
+"$SCRIPT_DIR/test/setup.sh" "$TEST_USER"
+sudo "$SCRIPT_DIR/test/ops/privileged/run-test-suite.sh" "$TEST_USER"

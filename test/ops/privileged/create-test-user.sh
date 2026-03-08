@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 source "$SCRIPT_DIR/test-user-guard.sh"
 
-TEST_USER="pen-test-user"
+TEST_USER="${1:?Usage: create-test-user.sh <username>}"
 verify_target_user "$TEST_USER"
 readonly TEST_USER
 
