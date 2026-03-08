@@ -22,11 +22,19 @@ After tests complete, the temporary user and all its state are torn down.
 
 Confirmed: the `container` CLI stores all data under `~/Library/Application Support/com.apple.container/` and runs a per-user launch agent (`com.apple.container.apiserver`). Images, containers, networks, and volumes are scoped to the calling macOS user. The test user gets a completely separate container environment with no visibility into the developer's containers.
 
-### Apiserver in-memory state survives user deletion
+### Launchd domains and container apiserver state survive user deletion
 
-The container apiserver (`com.apple.container.apiserver`) is a per-user launchd service that caches state in memory keyed by UID. When a macOS user is deleted and recreated at the same UID (which macOS does by default — it assigns the next available), the apiserver retains stale in-memory state from the old username. This causes `container system start` to hang indefinitely for the new user.
+The container apiserver (`com.apple.container.apiserver`) is a launchd agent registered in the per-user `user/<uid>` domain. When a macOS user is deleted with `sysadminctl -deleteUser`, the process is killed but the launchd domain — and all its registered services — persist. A new user assigned the same UID inherits this stale domain, which can cause `container system start` to hang or exhibit unpredictable behaviour.
 
-**A reboot clears this state.** Changing the test username requires a reboot before tests will pass. This is a macOS container runtime quirk — the state does not persist on disk (no leftover files in `/private/var/run/` or `/private/var/db/`), it is purely in the launchd service's memory.
+**Why the domain persists:** macOS launchd domains auto-materialize on demand. Even after account deletion, any XPC message targeting `user/<uid>` (including `launchctl print`) causes launchd to lazily instantiate an empty domain and bootstrap system agents into it. The domain is tied to the UID number, not the account record.
+
+**Fix:** `delete-test-account.sh` runs `launchctl bootout user/<uid>` after deleting the account. This tears down the entire user domain including the container apiserver, network, and core-images services. The bootout runs unconditionally without checking first — `launchctl print` would re-materialize the domain via lazy instantiation, defeating the purpose.
+
+**Ordering matters:** the bootout must happen *after* account deletion. If run while the account still exists, the valid UID causes launchd to re-bootstrap system agents immediately, repopulating the domain.
+
+**Gap:** if a previous test run was interrupted after account deletion but before bootout, the orphaned domain can't be cleaned up (no account means `id -u` can't resolve the UID). This requires a reboot. Acceptable for this edge case.
+
+**Also note:** changing the test username requires a reboot. The apiserver caches per-UID state in memory that survives user deletion but not reboot. If the username changes (even at the same UID), `container system start` hangs because the launchd service has stale in-memory state from the old username.
 
 ## System-wide touchpoints — RESOLVED
 

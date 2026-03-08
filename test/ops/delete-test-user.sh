@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Delete the e2e test user and clean up sudoers. No-op if user doesn't exist.
+# Delete the e2e test user and clean up sudoers and launchd state.
 # Orchestrator — delegates to leaf scripts that run as root.
 
 set -o nounset -o errexit -o pipefail

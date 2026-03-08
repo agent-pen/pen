@@ -21,9 +21,24 @@ if ! id "$TARGET" &>/dev/null; then
   exit 0
 fi
 
-# sysadminctl -deleteUser fails if the home directory is missing.
-# Ensure it exists and is owned by the user so sysadminctl deletes it.
-mkdir -p "/Users/$TARGET"
-chown "$TARGET" "/Users/$TARGET"
+TARGET_UID="$(id -u "$TARGET")"
+readonly TARGET_UID
 
-sysadminctl -deleteUser "$TARGET" 2>&1 || true
+delete_account() {
+  # sysadminctl -deleteUser fails if the home directory is missing.
+  # Ensure it exists and is owned by the user so sysadminctl deletes it.
+  mkdir -p "/Users/$TARGET"
+  chown "$TARGET" "/Users/$TARGET"
+  sysadminctl -deleteUser "$TARGET" 2>&1 || true
+}
+
+# Sweep orphaned launchd domain. Must run after account deletion — if run
+# before, the still-valid UID causes launchd to re-bootstrap system agents.
+# We bootout unconditionally without checking (launchctl print would
+# re-materialize the domain via lazy instantiation).
+bootout_launchd_domain() {
+  launchctl bootout "user/$TARGET_UID" 2>/dev/null || true
+}
+
+delete_account
+bootout_launchd_domain
