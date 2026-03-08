@@ -69,8 +69,8 @@ run_as_test_user() {
 verify_target_path() {
   local path="$1"
 
-  if [[ "$path" != "$_EXPECTED_HOME"* ]]; then
-    echo "FATAL: target path '$path' is not under '$_EXPECTED_HOME'" >&2
+  if [[ "$path" != "$_EXPECTED_HOME/"* ]]; then
+    echo "FATAL: target path '$path' is not under '$_EXPECTED_HOME/'" >&2
     exit 1
   fi
   if [[ "$path" == *"$_INVOKING_USER"* ]]; then
