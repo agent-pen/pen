@@ -107,7 +107,7 @@ Run end-to-end tests:
 ./test.sh
 ```
 
-Tests also run automatically via the git pre-commit hook.
+Tests also run automatically via the git pre-commit hook. See [doc/testing-strategy.md](doc/testing-strategy.md) for details on the testing approach.
 
 Debug interactively as the test user:
 

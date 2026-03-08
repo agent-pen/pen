@@ -59,17 +59,16 @@
 
 | # | Item | Notes | Security Concern? |
 |---|------|-------|-------------------|
-| 1 | End-to-end tests | Happy-path test (install→init→build→exec→stop→uninstall) in progress. 4/6 passing; blocked on mitmdump failing to bind to container gateway IP under test user. See `doc/testing-strategy.md` for the full plan | |
-| 2 | Unit tests | Unit tests for individual functions and scripts | |
-| 3 | Run e2e tests in CI | Self-hosted macOS runner (Apple Silicon, Tahoe 26.x+). See `doc/testing-strategy.md` Phase 4 | |
-| 4 | Verify `--enable-kernel-install` downloads without prompting in CI | CI won't have a pre-copied kernel, so `ensure_container_system` will trigger the ~450MB download. Verify this completes non-interactively | |
+| 1 | Unit tests | Unit tests for individual functions and scripts | |
+| 2 | Run e2e tests in CI | Self-hosted macOS runner (Apple Silicon, Tahoe 26.x+). See `doc/testing-strategy.md` | |
+| 3 | Verify `--enable-kernel-install` downloads without prompting in CI | CI won't have a pre-copied kernel, so `ensure_container_system` will trigger the ~450MB download. Verify this completes non-interactively | |
 
 ## Dependencies
 
 | # | Item | Notes | Security Concern? |
 |---|------|-------|-------------------|
 | 1 | Investigate adding Apple `container` CLI to Brewfile | Compatibility with existing direct installs is unknown — may conflict | |
-| 2 | ~~`develop.sh` sudoers entry for passwordless `test/run-e2e.sh`~~ | Done | |
+| 2 | ~~`develop.sh` sudoers entry for passwordless `test/run-e2e.sh`~~ | ~~Done~~ | |
 
 ## Code quality
 
