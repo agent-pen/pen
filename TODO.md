@@ -62,6 +62,13 @@
 | 1 | Unit tests | Unit tests for individual functions and scripts | |
 | 2 | Run e2e tests in CI | Self-hosted macOS runner (Apple Silicon, Tahoe 26.x+). See `doc/testing-strategy.md` | |
 | 3 | Verify `--enable-kernel-install` downloads without prompting in CI | CI won't have a pre-copied kernel, so `ensure_container_system` will trigger the ~450MB download. Verify this completes non-interactively | |
+| 4 | Root-own copied `install.sh` and `uninstall.sh` in test user home | `copy-pen-source.sh` chowns the entire source tree to the test user, but sudoers grants root execution of `install.sh` and `uninstall.sh`. The test user can rewrite these scripts and run arbitrary code as root. Root-own these two files after copying so the test user can't modify them | Privilege escalation: test user can modify sudoers-allowed scripts to execute arbitrary code as root |
+| 5 | Explicit allowlist for `develop.sh` sudoers grants | `develop.sh` globs `*.sh` in `test/libs/privileged/`, so any new file there automatically gets passwordless root. Use an explicit list of script names instead of a glob | Privilege escalation: new scripts silently gain root access |
+| 6 | Atomic sudoers write in `add-test-sudoers.sh` | Write sudoers to a temp file, validate with `visudo -cf`, then `mv` into place. Currently writes directly then validates, leaving a malformed file on disk if validation fails | |
+| 7 | Add lockfile to prevent concurrent test runs | Two simultaneous `test.sh` runs race on creating/deleting `pen-test-user`, which can corrupt each other's state or delete a user mid-test | |
+| 8 | Use `cp -RP` in `copy-pen-source.sh` | `cp -R` follows symlinks. A symlink in the working tree pointing to a sensitive file would be copied as a regular file readable by the test user. `cp -RP` preserves symlinks as symlinks | |
+| 9 | Don't remove production sudoers in `remove-test-sudoers.sh` | Line 19 removes `/etc/sudoers.d/pen-${uid}` (the production pfctl-wrapper entry) in addition to the test entry. Only the `-test` suffixed file should be removed | Privilege removal: teardown silently removes production pen sudoers for the test user's UID |
+| 10 | Sanitize pfctl anchor suffix in `pfctl-wrapper.sh` | Anchor name is only prefix-checked. Add a character class validation (e.g. `[a-zA-Z0-9._-]`) to prevent unexpected characters reaching `pfctl -a` | Privilege escalation: unconstrained suffix passed to root-executed pfctl |
 
 ## Dependencies
 
@@ -79,3 +86,5 @@
 | 3 | Reduce duplication across scripts | Reduce duplication across `install.sh`, `uninstall.sh`, and other scripts | |
 | 3 | Collapse `./penctl` into project root | Move contents of `penctl/` to the project root to flatten the directory structure | |
 | 4 | Evaluate removing `request()` from egress proxy | Determine whether `request()` can be removed from `penctl/commands/lib/egress-proxy.py` | |
+| 5 | Replace `eval echo ~$USER` in `install.sh` and `uninstall.sh` | `eval` with user-controlled input in a root context. Replace with `dscl` lookup or hardcoded `/Users/$REAL_USER` with existence check | Command injection: crafted username could execute arbitrary code as root via `eval` |
+| 6 | Atomic sudoers write in `install.sh` | Same pattern as `add-test-sudoers.sh` — write to temp file, validate with `visudo -cf`, then `mv` into place | |
