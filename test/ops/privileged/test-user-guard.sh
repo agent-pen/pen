@@ -60,6 +60,9 @@ run_as_test_user() {
   verify_target_user_and_uid "$target"
   local target_uid
   target_uid="$(id -u "$target")"
+  # launchctl asuser: enter the target user's Mach bootstrap context (service namespace)
+  # env -i: clear inherited root environment; pass only TERM and LANG
+  # sudo -i -u: start a login shell as the target user (sets HOME, sources profile)
   launchctl asuser "$target_uid" env -i TERM="$TERM" LANG="$LANG" sudo -i -u "$target" "$@"
 }
 
