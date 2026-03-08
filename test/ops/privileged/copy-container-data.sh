@@ -25,18 +25,11 @@ DST="/Users/$TARGET/$CONTAINER_BASE"
 verify_target_path "$DST"
 readonly TARGET SUDO_USER_HOME CONTAINER_BASE SRC DST
 
-# Ensure the container base directory (and intermediates) are owned by the test
-# user so that `container system start` can create the apiserver socket there.
 mkdir -p "$DST"
-chown "$TARGET:staff" \
-  "/Users/$TARGET/Library" \
-  "/Users/$TARGET/Library/Application Support" \
-  "$DST"
 
 for subdir in kernels content; do
   if [[ -d "$SRC/$subdir" ]]; then
     mkdir -p "$DST/$subdir"
-    chown "$TARGET:staff" "$DST/$subdir"
     cp -R "$SRC/$subdir"/* "$DST/$subdir"/
     find "$DST/$subdir" -type l | while read -r link; do
       local_target="$(readlink "$link")"
@@ -44,8 +37,11 @@ for subdir in kernels content; do
         ln -sf "${local_target/$SUDO_USER_HOME//Users/$TARGET}" "$link"
       fi
     done
-    chown -R "$TARGET:staff" "$DST/$subdir"
   else
     echo "Warning: $SRC/$subdir not found — will be downloaded at runtime."
   fi
 done
+
+# Own the entire tree (including Library/Application Support intermediates)
+# so `container system start` can create the apiserver socket.
+chown -R "$TARGET:staff" "/Users/$TARGET/Library"
