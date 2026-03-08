@@ -9,6 +9,13 @@
 #   verify_target_path <path>              — path is under test user home
 #   run_as_test_user <username> [command]  — hand-off via launchctl + sudo -i
 
+require_root() {
+  if [[ "$(id -u)" -ne 0 ]]; then
+    echo "Error: must be run as root." >&2
+    exit 1
+  fi
+}
+
 _INVOKING_USER="${SUDO_USER:?must be run via sudo}"
 readonly _INVOKING_USER
 
