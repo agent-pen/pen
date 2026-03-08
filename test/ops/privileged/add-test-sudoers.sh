@@ -11,14 +11,13 @@ require_root
 
 TARGET="${1:?Usage: add-test-sudoers.sh <username>}"
 verify_target_user_and_uid "$TARGET"
+TARGET_UID="$(resolve_target_uid "$TARGET")"
 
 PEN_SOURCE="/Users/$TARGET/pen-source"
 verify_target_path "$PEN_SOURCE"
-readonly TARGET PEN_SOURCE
 
-TARGET_UID="$(id -u "$TARGET")"
 SUDOERS_FILE="/etc/sudoers.d/pen-${TARGET_UID}-test"
-readonly TARGET_UID SUDOERS_FILE
+readonly TARGET PEN_SOURCE TARGET_UID SUDOERS_FILE
 
 cat > "$SUDOERS_FILE" <<EOF
 $TARGET ALL=(root) NOPASSWD: $PEN_SOURCE/install.sh

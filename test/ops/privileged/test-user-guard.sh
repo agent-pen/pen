@@ -6,6 +6,7 @@
 # Provides:
 #   verify_target_user <username>          — name + invoking-user check
 #   verify_target_user_and_uid <username>  — additionally checks UID differs
+#   resolve_target_uid <username>           — print UID to stdout
 #   verify_target_path <path>              — path is under test user home
 #   run_as_test_user <username> [command]  — hand-off via launchctl + sudo -i
 
@@ -54,12 +55,16 @@ verify_target_user_and_uid() {
   fi
 }
 
+resolve_target_uid() {
+  id -u "$1"
+}
+
 run_as_test_user() {
   local target="$1"
   shift
   verify_target_user_and_uid "$target"
   local target_uid
-  target_uid="$(id -u "$target")"
+  target_uid="$(resolve_target_uid "$target")"
   # launchctl asuser: enter the target user's Mach bootstrap context (service namespace)
   # env -i: clear inherited root environment; pass only TERM and LANG
   # sudo -i -u: start a login shell as the target user (sets HOME, sources profile)

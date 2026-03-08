@@ -10,14 +10,15 @@ source "$SCRIPT_DIR/test-user-guard.sh"
 require_root
 
 TARGET="${1:?Usage: delete-test-account.sh <username>}"
-verify_target_user_and_uid "$TARGET"
+verify_target_user "$TARGET"
 readonly TARGET
 
 if ! id "$TARGET" &>/dev/null; then
   exit 0
 fi
 
-TARGET_UID="$(id -u "$TARGET")"
+verify_target_user_and_uid "$TARGET"
+TARGET_UID="$(resolve_target_uid "$TARGET")"
 readonly TARGET_UID
 
 delete_account() {
