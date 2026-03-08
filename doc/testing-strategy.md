@@ -58,8 +58,3 @@ Privileged test scripts use multiple layers of protection:
 - **Cloudflare WARP conflicts with container DNS** — disable WARP before running tests
 - **Launchd domains survive user deletion** — `delete-test-account.sh` runs `launchctl bootout user/<uid>` after deletion to clean up orphaned domains
 - **Changing the test username requires a reboot** — the container apiserver caches per-UID state in memory
-- **BuildKit image downloaded per test run** — the test user is recreated each time, so the ~100MB BuildKit image is re-downloaded
-
-## CI
-
-These tests require macOS with Apple Silicon and macOS Tahoe (26.x+). Standard CI runners don't offer this yet. A self-hosted runner is needed.
