@@ -18,8 +18,7 @@ _EXPECTED_USER=""
 printf -v _EXPECTED_USER '%s-%s' 'pen' 'test-user'
 readonly _EXPECTED_USER
 
-_EXPECTED_HOME=""
-printf -v _EXPECTED_HOME '/Users/%s-%s' 'pen' 'test-user'
+_EXPECTED_HOME="/Users/${_EXPECTED_USER}"
 readonly _EXPECTED_HOME
 
 verify_target_user() {
