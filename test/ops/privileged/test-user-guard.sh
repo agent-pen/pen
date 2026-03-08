@@ -54,7 +54,7 @@ run_as_test_user() {
   verify_target_user_and_uid "$target"
   local target_uid
   target_uid="$(id -u "$target")"
-  launchctl asuser "$target_uid" sudo -i -u "$target" "$@"
+  launchctl asuser "$target_uid" env -u PATH sudo -i -u "$target" "$@"
 }
 
 verify_target_path() {

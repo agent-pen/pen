@@ -29,4 +29,14 @@ sysadminctl -addUser "$TEST_USER" \
 # sysadminctl -createHomeDirectory is broken — use createhomedir instead.
 createhomedir -c -u "$TEST_USER" >&2
 
+configure_shell_profile() {
+  local home="/Users/$TEST_USER"
+  cat > "$home/.zprofile" <<'PROFILE'
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+PROFILE
+  chown "$TEST_USER" "$home/.zprofile"
+}
+
+configure_shell_profile
+
 id -u "$TEST_USER"
