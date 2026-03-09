@@ -62,18 +62,19 @@
 | 1 | Unit tests | Unit tests for individual functions and scripts | |
 | 2 | Run e2e tests in CI | Self-hosted macOS runner (Apple Silicon, Tahoe 26.x+). See `doc/testing-strategy.md` | |
 | 3 | Verify `--enable-kernel-install` downloads without prompting in CI | CI won't have a pre-copied kernel, so `ensure_container_system` will trigger the ~450MB download. Verify this completes non-interactively | |
-| 5 | ~~Explicit allowlist for `develop.sh` sudoers grants~~ | ~~Done~~ | |
-| 6 | Atomic sudoers write in `add-test-sudoers.sh` | Write sudoers to a temp file, validate with `visudo -cf`, then `mv` into place. Currently writes directly then validates, leaving a malformed file on disk if validation fails | |
+| 5 | Atomic sudoers write in `add-test-sudoers.sh` | Write sudoers to a temp file, validate with `visudo -cf`, then `mv` into place. Currently writes directly then validates, leaving a malformed file on disk if validation fails | |
 | 7 | Add lockfile to prevent concurrent test runs | Two simultaneous `test.sh` runs race on creating/deleting `pen-test-user`, which can corrupt each other's state or delete a user mid-test | |
-| 8 | Use `cp -RP` in `copy-pen-source.sh` | `cp -R` follows symlinks. A symlink in the working tree pointing to a sensitive file would be copied as a regular file readable by the test user. `cp -RP` preserves symlinks as symlinks | |
-| 10 | Sanitize pfctl anchor suffix in `pfctl-wrapper.sh` | Anchor name is only prefix-checked. Add a character class validation (e.g. `[a-zA-Z0-9._-]`) to prevent unexpected characters reaching `pfctl -a` | Privilege escalation: unconstrained suffix passed to root-executed pfctl |
+| 8 | Force-clean sandbox resources in test teardown | Test teardown (`delete-test-user.sh`) hangs if a sandbox is still running when the test user is deleted. Teardown should force-stop containers and clean up pf/proxy/network before deleting the account |
+| 9 | Use `cp -RP` in `copy-pen-source.sh` | `cp -R` follows symlinks. A symlink in the working tree pointing to a sensitive file would be copied as a regular file readable by the test user. `cp -RP` preserves symlinks as symlinks | |
+| 10 | Investigate `chmod u-w` on root-owned privileged scripts | Claude Code's Edit tool bypasses filesystem permissions to write to `root:wheel` files. Test whether removing owner write (`chmod u-w`) blocks this. If so, `develop.sh` should set `r-xr-xr-x` on privileged scripts instead of `rwxr-xr-x` | Agent can modify privileged scripts despite root ownership |
+| 11 | Faster edit-test loop for interactive debugging | Currently must re-run `setup.sh` to copy source after edits, which recreates the test user. Not ergonomic when using `shell-test-user.sh` for interactive iteration | |
+| 12 | Sanitize pfctl anchor suffix in `pfctl-wrapper.sh` | Anchor name is only prefix-checked. Add a character class validation (e.g. `[a-zA-Z0-9._-]`) to prevent unexpected characters reaching `pfctl -a` | Privilege escalation: unconstrained suffix passed to root-executed pfctl |
 
 ## Dependencies
 
 | # | Item | Notes | Security Concern? |
 |---|------|-------|-------------------|
 | 1 | Investigate adding Apple `container` CLI to Brewfile | Compatibility with existing direct installs is unknown — may conflict | |
-| 2 | ~~`develop.sh` sudoers entry for passwordless `test/run-e2e.sh`~~ | ~~Done~~ | |
 
 ## Code quality
 
@@ -84,5 +85,4 @@
 | 3 | Reduce duplication across scripts | Reduce duplication across `install.sh`, `uninstall.sh`, and other scripts | |
 | 3 | Collapse `./penctl` into project root | Move contents of `penctl/` to the project root to flatten the directory structure | |
 | 4 | Evaluate removing `request()` from egress proxy | Determine whether `request()` can be removed from `penctl/commands/lib/egress-proxy.py` | |
-| 5 | ~~Replace `eval echo ~$USER` in `install.sh` and `uninstall.sh`~~ | ~~Done~~ | |
-| 6 | Atomic sudoers write in `install.sh` | Same pattern as `add-test-sudoers.sh` — write to temp file, validate with `visudo -cf`, then `mv` into place | |
+| 5 | Atomic sudoers write in `install.sh` | Same pattern as `add-test-sudoers.sh` — write to temp file, validate with `visudo -cf`, then `mv` into place | |
