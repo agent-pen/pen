@@ -11,6 +11,20 @@ SUDOERS_FILE="/etc/sudoers.d/pen-dev-${CURRENT_UID}"
 
 UNDO="${1:-}"
 PRIVILEGED_DIR="${PEN_HOME}/test/libs/privileged"
+# Explicit list — new scripts must be added here to get sudoers grants.
+# target-user-guards.sh is excluded: it's a library sourced by these scripts,
+# not a command, so it needs root ownership (below) but not a sudoers entry.
+PRIVILEGED_SCRIPTS=(
+  "${PRIVILEGED_DIR}/copy-container-data.sh"
+  "${PRIVILEGED_DIR}/copy-pen-source.sh"
+  "${PRIVILEGED_DIR}/create-test-user.sh"
+  "${PRIVILEGED_DIR}/delete-test-account.sh"
+  "${PRIVILEGED_DIR}/grant-test-privileges.sh"
+  "${PRIVILEGED_DIR}/remove-test-sudoers.sh"
+  "${PRIVILEGED_DIR}/run-test-suite.sh"
+  "${PRIVILEGED_DIR}/shell-test-user.sh"
+)
+readonly PRIVILEGED_SCRIPTS
 
 if [[ "$UNDO" == "--undo" ]]; then
   echo "Removing sudoers for privileged test scripts..."
@@ -18,7 +32,11 @@ if [[ "$UNDO" == "--undo" ]]; then
 else
   echo "Configuring sudoers for privileged test scripts..."
   sudoers_lines=""
-  for script in "$PRIVILEGED_DIR"/*.sh; do
+  for script in "${PRIVILEGED_SCRIPTS[@]}"; do
+    if [[ ! -f "$script" ]]; then
+      echo "FATAL: expected script not found: $script" >&2
+      exit 1
+    fi
     sudoers_lines+="${CURRENT_USER} ALL=(root) NOPASSWD: ${script} *"$'\n'
   done
   echo "$sudoers_lines" | sudo tee "$SUDOERS_FILE" > /dev/null
@@ -28,12 +46,12 @@ fi
 
 if [[ "$UNDO" == "--undo" ]]; then
   echo "Resetting ownership on privileged test scripts..."
-  for script in "$PRIVILEGED_DIR"/*.sh; do
+  for script in "${PRIVILEGED_SCRIPTS[@]}" "${PRIVILEGED_DIR}/target-user-guards.sh"; do
     sudo chown "$CURRENT_USER:staff" "$script"
   done
 else
   echo "Setting ownership on privileged test scripts..."
-  for script in "$PRIVILEGED_DIR"/*.sh; do
+  for script in "${PRIVILEGED_SCRIPTS[@]}" "${PRIVILEGED_DIR}/target-user-guards.sh"; do
     sudo chown root:wheel "$script"
     sudo chmod 755 "$script"
   done
