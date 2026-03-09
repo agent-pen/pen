@@ -14,11 +14,9 @@ ensure_correct_target_user_and_uid "$TARGET"
 
 SRC="$(cd -- "$SCRIPT_DIR/../../.." && pwd)"
 DEST="/Users/$TARGET/pen-source"
-TEST_PROJECT="/Users/$TARGET/test-project"
 
 ensure_correct_target_path "$DEST"
-ensure_correct_target_path "$TEST_PROJECT"
-readonly TARGET SRC DEST TEST_PROJECT
+readonly TARGET SRC DEST
 
 cp -R "$SRC" "$DEST"
 
@@ -28,5 +26,3 @@ cp -R "$SRC" "$DEST"
 echo "FROM pen-test-minimal" > "$DEST/penctl/image/Dockerfile"
 
 chown -R "$TARGET:staff" "$DEST"
-mkdir -p "$TEST_PROJECT"
-chown "$TARGET:staff" "$TEST_PROJECT"

@@ -4,7 +4,7 @@ Date: 2026-03-09
 
 ## Status
 
-Accepted
+Superceded by [37. Per-file test isolation with independent project directories](0037-per-file-test-isolation-with-independent-project-directories.md)
 
 ## Context
 

@@ -1,6 +1,25 @@
 # Shared helpers for pen e2e tests.
 # Loaded explicitly by each .bats file.
 
+install_pen() {
+  sudo "$PEN_REPO/install.sh"
+}
+
+create_test_project() {
+  rm -rf "$1"
+  mkdir -p "$1"
+  cd "$1"
+}
+
+cleanup_test_project() {
+  local dir="$1"
+  local proxy_pid_file="${dir}/.pen/proxy.pid"
+  if [[ -f "$proxy_pid_file" ]]; then
+    kill "$(cat "$proxy_pid_file")" 2>/dev/null || true
+  fi
+  rm -rf "$dir"
+}
+
 expect_success() {
   run "$@"
   if [ "$status" -ne 0 ]; then

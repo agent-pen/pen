@@ -5,5 +5,4 @@
 set -o nounset -o errexit -o pipefail
 
 export PEN_REPO="$HOME/pen-source"
-export TEST_PROJECT="$HOME/test-project"
 exec bats "$PEN_REPO/test/suite/"
