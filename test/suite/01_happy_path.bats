@@ -25,8 +25,7 @@ teardown_file() {
   assert_directory_exists .pen
 }
 
-@test "pen build with fixture Dockerfile" {
-  cp "$PEN_REPO/test/suite/fixtures/Dockerfile.minimal" .pen/Dockerfile
+@test "pen build" {
   expect_success pen build
 }
 

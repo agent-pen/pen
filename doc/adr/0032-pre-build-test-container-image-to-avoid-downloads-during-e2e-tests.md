@@ -4,7 +4,7 @@ Date: 2026-03-09
 
 ## Status
 
-Accepted
+Superceded by [36. Override default Dockerfile during test source copy](0036-override-default-dockerfile-during-test-source-copy.md)
 
 ## Context
 

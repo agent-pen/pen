@@ -21,6 +21,12 @@ ensure_correct_target_path "$TEST_PROJECT"
 readonly TARGET SRC DEST TEST_PROJECT
 
 cp -R "$SRC" "$DEST"
+
+# Replace the default Dockerfile with a single-line FROM pointing to the
+# pre-built test image. This avoids a slow full build during tests while
+# still exercising the real pen build path.
+echo "FROM pen-test-minimal" > "$DEST/penctl/image/Dockerfile"
+
 chown -R "$TARGET:staff" "$DEST"
 mkdir -p "$TEST_PROJECT"
 chown "$TARGET:staff" "$TEST_PROJECT"
