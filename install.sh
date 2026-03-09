@@ -9,7 +9,11 @@ if [[ "$(id -u)" -ne 0 ]]; then
 fi
 
 REAL_USER="${SUDO_USER:?install.sh must be run with sudo, not as root directly}"
-REAL_HOME="$(eval echo "~${REAL_USER}")"
+REAL_HOME="/Users/${REAL_USER}"
+if [[ ! -d "$REAL_HOME" ]]; then
+  echo "Error: home directory not found: $REAL_HOME" >&2
+  exit 1
+fi
 
 PEN_HOME="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PFCTL_WRAPPER="${PEN_HOME}/penctl/commands/lib/pfctl-wrapper.sh"
