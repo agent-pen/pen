@@ -16,42 +16,32 @@ teardown_file() {
 }
 
 @test "install pen" {
-  run sudo "$PEN_REPO/install.sh"
-  assert_success
-  run command -v pen
-  assert_success
+  expect_success sudo "$PEN_REPO/install.sh"
+  expect_success command -v pen
 }
 
 @test "pen init" {
-  run pen init
-  assert_success
-  [[ -d .pen ]]
+  expect_success pen init
+  assert_directory_exists .pen
 }
 
 @test "pen build with fixture Dockerfile" {
   cp "$PEN_REPO/test/suite/fixtures/Dockerfile.minimal" .pen/Dockerfile
-  run pen build
-  assert_success
+  expect_success pen build
 }
 
 @test "pen exec runs command in sandbox" {
-  run pen exec whoami
-  assert_success
+  expect_success pen exec whoami
   assert_output_contains "root"
 }
 
 @test "pen stop" {
-  run pen status
-  assert_success
-  run pen stop
-  assert_success
-  run pen status
-  assert_failure
+  expect_success pen status
+  expect_success pen stop
+  expect_failure pen status
 }
 
 @test "uninstall pen" {
-  run sudo "$PEN_REPO/uninstall.sh"
-  assert_success
-  run command -v pen
-  assert_failure
+  expect_success sudo "$PEN_REPO/uninstall.sh"
+  expect_failure command -v pen
 }

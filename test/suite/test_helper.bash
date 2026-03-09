@@ -1,26 +1,29 @@
 # Shared helpers for pen e2e tests.
 # Loaded explicitly by each .bats file.
 
-assert_success() {
-  if [[ -z "${status+x}" ]]; then
-    echo "assert_success: \$status is not set — did you forget 'run'?" >&2
-    return 1
-  fi
+expect_success() {
+  run "$@"
   if [ "$status" -ne 0 ]; then
-    echo "assert_success: expected exit 0, got $status" >&2
+    echo "expect_success: expected exit 0, got $status" >&2
+    echo "command: $*" >&2
     echo "output: $output" >&2
     return 1
   fi
 }
 
-assert_failure() {
-  if [[ -z "${status+x}" ]]; then
-    echo "assert_failure: \$status is not set — did you forget 'run'?" >&2
+expect_failure() {
+  run "$@"
+  if [ "$status" -eq 0 ]; then
+    echo "expect_failure: expected non-zero exit, got 0" >&2
+    echo "command: $*" >&2
+    echo "output: $output" >&2
     return 1
   fi
-  if [ "$status" -eq 0 ]; then
-    echo "assert_failure: expected non-zero exit, got 0" >&2
-    echo "output: $output" >&2
+}
+
+assert_directory_exists() {
+  if [[ ! -d "$1" ]]; then
+    echo "assert_directory_exists: directory not found: $1" >&2
     return 1
   fi
 }
