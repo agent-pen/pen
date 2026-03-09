@@ -21,6 +21,17 @@ ensure_correct_target_user_and_uid "$TARGET"
 TARGET_UID="$(resolve_target_uid "$TARGET")"
 readonly TARGET_UID
 
+flush_pf_anchors() {
+  pfctl -a com.apple -s Anchors 2>/dev/null | grep "^ *com.apple/pen-user-${TARGET_UID}-project-" | while read -r anchor; do
+    pfctl -a "$anchor" -F all 2>/dev/null || true
+  done || true
+}
+
+force_kill_processes() {
+  pkill -9 -u "$TARGET_UID" 2>/dev/null || true
+  sleep 1
+}
+
 delete_account() {
   # sysadminctl -deleteUser fails if the home directory is missing.
   # Ensure it exists and is owned by the user so sysadminctl deletes it.
@@ -37,5 +48,7 @@ bootout_launchd_domain() {
   launchctl bootout "user/$TARGET_UID" 2>/dev/null || true
 }
 
+force_kill_processes
+flush_pf_anchors
 delete_account
 bootout_launchd_domain
