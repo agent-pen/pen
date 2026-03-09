@@ -18,11 +18,14 @@ teardown_file() {
 @test "install pen" {
   run sudo "$PEN_REPO/install.sh"
   assert_success
+  run command -v pen
+  assert_success
 }
 
 @test "pen init" {
   run pen init
   assert_success
+  [[ -d .pen ]]
 }
 
 @test "pen build with fixture Dockerfile" {
@@ -38,11 +41,17 @@ teardown_file() {
 }
 
 @test "pen stop" {
+  run pen status
+  assert_success
   run pen stop
   assert_success
+  run pen status
+  assert_failure
 }
 
 @test "uninstall pen" {
   run sudo "$PEN_REPO/uninstall.sh"
   assert_success
+  run command -v pen
+  assert_failure
 }
