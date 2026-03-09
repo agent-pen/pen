@@ -7,7 +7,7 @@ ensure_container_system() {
 }
 
 path_hash=$(printf '%s' "$PEN_PROJECT" | shasum | cut -c1-6)
-container_name="pen-$(basename "$PEN_PROJECT")-${path_hash}"
+container_name="pen-user-$(id -u)-project-$(basename "$PEN_PROJECT")-${path_hash}"
 target="${container_name}-container"
 network="${container_name}-network"
 proxy_port=8080
