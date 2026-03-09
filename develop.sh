@@ -73,6 +73,12 @@ if [[ "$UNDO" != "--undo" ]]; then
   env HOMEBREW_NO_AUTO_UPDATE=1 brew bundle --file="${PEN_HOME}/Brewfile.dev"
 fi
 
+if [[ "$UNDO" != "--undo" ]]; then
+  echo "Building test-minimal container image..."
+  container system start --enable-kernel-install
+  container build -t pen-test-minimal --file "${PEN_HOME}/test/suite/fixtures/Dockerfile.test-minimal-build" "${PEN_HOME}/test/suite/fixtures"
+fi
+
 if [[ "$UNDO" == "--undo" ]]; then
   echo "Dev setup undone."
 else

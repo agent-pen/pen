@@ -23,6 +23,10 @@ readonly TARGET SUDO_USER_HOME CONTAINER_BASE SRC DST
 
 mkdir -p "$DST"
 
+if [[ -f "$SRC/state.json" ]]; then
+  cp "$SRC/state.json" "$DST/state.json"
+fi
+
 for subdir in kernels content; do
   if [[ -d "$SRC/$subdir" ]]; then
     mkdir -p "$DST/$subdir"
