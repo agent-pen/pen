@@ -69,6 +69,7 @@
 | 10 | Investigate `chmod u-w` on root-owned privileged scripts | Claude Code's Edit tool bypasses filesystem permissions to write to `root:wheel` files. Test whether removing owner write (`chmod u-w`) blocks this. If so, `develop.sh` should set `r-xr-xr-x` on privileged scripts instead of `rwxr-xr-x` | Agent can modify privileged scripts despite root ownership |
 | 11 | Faster edit-test loop for interactive debugging | Currently must re-run `setup.sh` to copy source after edits, which recreates the test user. Not ergonomic when using `shell-test-user.sh` for interactive iteration | |
 | 12 | Sanitize pfctl anchor suffix in `pfctl-wrapper.sh` | Anchor name is only prefix-checked. Add a character class validation (e.g. `[a-zA-Z0-9._-]`) to prevent unexpected characters reaching `pfctl -a` | Privilege escalation: unconstrained suffix passed to root-executed pfctl |
+| 13 | Avoid macOS GUI authorization prompt when test source files change | Changing test source files triggers a macOS dialog asking the user to authorize the terminal app. Investigate granting Full Disk Access or Developer Tool access to the terminal to suppress this | |
 
 ## Dependencies
 
