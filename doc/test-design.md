@@ -12,41 +12,42 @@ Tests should assert what pen *does*, not how it's wired internally.
 
 ## When implementation coupling is unavoidable (security invariants)
 
-Some security properties are silent failures — pen works fine but is insecure. These can't be tested through normal usage, so tests must inspect implementation details. Strategy: couple to the *minimum stable interface* needed.
+Some security properties are silent failures — pen works fine but is insecure. These can't be tested through normal usage, so tests must inspect implementation details. For security, err on the side of brittleness — a test that breaks when privileges change is a feature, not a bug.
 
-**Example**: install creates sudoers-referenced scripts owned by `root:wheel`. Rather than hardcoding the pfctl-wrapper path:
-1. Couple to `/etc/sudoers.d/pen-$UID` — this is a system convention, unlikely to change.
-2. Parse the sudoers file to discover which scripts it references.
-3. Assert those scripts' security properties (ownership, permissions, not user-writable).
+**Example**: install grants passwordless sudo for the pfctl wrapper. The test uses `sudo -l` (every user can list their own privileges) to enumerate NOPASSWD entries, then asserts:
+1. Exactly one pen script has sudoers privileges (the pfctl wrapper).
+2. That script is not writable by the test user.
 
-This way, if pen renames or moves the wrapper, the test still works — it follows the sudoers file to whatever scripts are referenced.
+The test deliberately fails if unexpected scripts gain privileges — this is the right trade-off for security-critical assertions.
 
 ## Stable vs. unstable interfaces
 
 **Stable** (safe to reference in tests):
 - `pen` CLI commands and their output
 - `~/.pen/sandboxes/` — user-facing, documented path
-- `/etc/sudoers.d/pen-$UID` — system convention
+- `sudo -l` output — every user can list their own sudo privileges
+- `penctl/commands/lib/pfctl-wrapper.sh` — the sole privileged script; deliberately coupled for security
 
 **Unstable** (avoid in tests):
-- Internal file paths like pfctl-wrapper location
 - Symlink targets within pen's internals
-- Specific sudoers syntax beyond what's needed to extract file paths
+- Sudoers file contents (not readable by the test user without privilege escalation)
 
 ## Three-tier install testing strategy
 
 1. **Functional effects** — tested implicitly through later pen commands (no dedicated install tests needed). If `pen init` works, install set up the CLI correctly.
-2. **Security invariants** — small dedicated test file with minimal coupling via sudoers parsing. These are the silent-failure properties that can't be caught by usage.
+2. **Security invariants** — small dedicated test file asserting exactly which scripts have sudo privileges and that they're tamper-proof. Deliberately brittle — fails if privileges change.
 3. **User-facing paths** (`~/.pen/sandboxes/`) — reference directly in tests; they're part of pen's contract.
 
 ## Test file organization
 
 - One file per command or concern, numbered for execution ordering.
-- Each file is self-contained: calls `install_pen` in its own `setup_file()`.
-- `01_install.bats` — install assertions including security invariants (runs first so failures surface early).
+- `setup_suite` runs `pen install` once for the entire suite.
+- `01_install.bats` — install-specific assertions (security invariants). Does not run install itself.
 - `99_uninstall.bats` — uninstall assertions (runs last; uninstall would break subsequent files).
 - Files in between (02–98) test individual pen commands, each independent.
 - No reliance on `setup_suite` for assertions — bats only supports assertions inside `@test` blocks.
+
+**Project setup helpers**: `create_test_project` verifies pen is installed (`command -v pen`) and creates a fresh project directory. `setup_test_project` extends this by also running `pen init`. The install check is a guard — if `setup_suite` didn't run or install is broken, `setup_file` fails and the entire file is skipped with a clear error. Files that test `pen init` itself use `create_test_project` and call `pen init` explicitly in the test.
 
 ## Bats gotchas
 

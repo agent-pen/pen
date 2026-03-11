@@ -19,18 +19,23 @@ Apple Container is per-user — images, containers, networks, and volumes are sc
 ```
 test/
   libs/
-    privileged/           # Leaf scripts run as root (root:wheel owned)
+    privileged/              # Leaf scripts run as root (root:wheel owned)
       create-test-user.sh
       delete-test-account.sh
       copy-container-data.sh
       copy-pen-source.sh
-      add-test-sudoers.sh
+      grant-test-privileges.sh
       remove-test-sudoers.sh
-    target-user-guards.sh  # Guard functions sourced by leaf scripts
-  run-test-suite.sh        # Runs bats in the test user's Mach context
-  e2e/
-    test_helper.bash       # Assertion helpers
-    01_happy_path.bats     # Full lifecycle: install → init → build → exec → stop → uninstall
+      run-test-suite.sh       # Runs bats in the test user's Mach context
+      shell-test-user.sh      # Interactive shell for debugging
+    target-user-guards.sh     # Guard functions sourced by leaf scripts
+  suite/
+    setup_suite.bash       # Runs install once for the entire suite
+    test_helper.bash       # Assertion and setup helpers
+    01_install.bats        # Install security invariants
+    02_init.bats           # pen init
+    98_happy_path.bats     # Full lifecycle: build → exec → stop
+    99_uninstall.bats      # Uninstall (runs last)
 ```
 
 Three-phase execution enables interactive debugging:
