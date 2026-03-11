@@ -1,14 +1,19 @@
 # Shared helpers for pen e2e tests.
 # Loaded explicitly by each .bats file.
 
-install_pen() {
-  sudo "$PEN_REPO/install.sh"
-}
-
+# Verify install succeeded and create a fresh project directory.
+# Caller sets PROJECT_DIR at file scope before calling.
 create_test_project() {
+  command -v pen > /dev/null
   rm -rf "$1"
   mkdir -p "$1"
+}
+
+# create_test_project + pen init. Use when tests need an initialized project.
+setup_test_project() {
+  create_test_project "$1"
   cd "$1"
+  pen init
 }
 
 cleanup_test_project() {
