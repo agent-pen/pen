@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 See `README.md` for an overview of pen, prerequisites, installation, and usage. See `TODO.md` for the project backlog.
 
-There are no tests, linters, or build steps for pen itself.
+## Testing
+
+See `doc/test-design.md` for test design principles and `doc/testing-strategy.md` for test infrastructure. Run the full e2e suite with `./test.sh`.
 
 ## Architecture
 
