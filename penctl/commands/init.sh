@@ -4,14 +4,17 @@ set -o nounset -o errexit -o pipefail
 
 source "${PEN_HOME}/penctl/commands/lib/common.sh"
 
-if [[ -d "$sandbox_config_dir" ]]; then
-  echo "Already initialized: ${sandbox_config_dir}"
-  exit 0
-fi
+abort_if_already_initialized() {
+  if [[ -d "$sandbox_config_dir" ]]; then
+    echo "Already initialized: ${sandbox_config_dir}"
+    exit 0
+  fi
+}
 
-mkdir "$sandbox_config_dir"
+create_default_allowlists() {
+  mkdir "$sandbox_config_dir"
 
-cat > "${sandbox_config_dir}/http-allowlist.txt" << 'ALLOWLIST'
+  cat > "${sandbox_config_dir}/http-allowlist.txt" << 'ALLOWLIST'
 # HTTP(S) proxy allowlist: host:port (one per line, # comments supported)
 # Enforced by the pen egress proxy via hostname matching.
 
@@ -30,14 +33,19 @@ ports.ubuntu.com:443
 ports.ubuntu.com:80
 ALLOWLIST
 
-cat > "${sandbox_config_dir}/network-allowlist.txt" << 'ALLOWLIST'
+  cat > "${sandbox_config_dir}/network-allowlist.txt" << 'ALLOWLIST'
 # IP-based egress rules for non-HTTP protocols (e.g. SSH for git).
 # These bypass the HTTP proxy and go through pf directly (TCP and UDP).
 # Format: ip:port (one per line, # comments supported)
 ALLOWLIST
+}
 
-mkdir -p "${PEN_PROJECT}/.pen"
+create_project_pen_dir() {
+  mkdir -p "${PEN_PROJECT}/.pen"
+  printf '\n/.pen/\n' >> "${PEN_PROJECT}/.gitignore"
+}
 
-printf '\n/.pen/\n' >> "${PEN_PROJECT}/.gitignore"
-
+abort_if_already_initialized
+create_default_allowlists
+create_project_pen_dir
 echo "Initialisation succeeded."
