@@ -15,16 +15,6 @@ if [[ ! -d "$REAL_HOME" ]]; then
   exit 1
 fi
 
-symlink_pen_binary() {
-  local pen_home="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-  local local_bin="${REAL_HOME}/.local/bin"
-  sudo -u "$REAL_USER" mkdir -p "$local_bin"
-  sudo -u "$REAL_USER" ln -sf "${pen_home}/pen" "${local_bin}/pen"
-
-  echo "Ensure ~/.local/bin is on your PATH. Add to ~/.zshrc, ~/.bashrc, etc.:"
-  echo "  export PATH=\"\${HOME}/.local/bin:\${PATH}\""
-}
-
 install_pfctl_wrapper() {
   local pen_home="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
   local pfctl_wrapper="${pen_home}/penctl/commands/lib/pfctl-wrapper.sh"
@@ -43,9 +33,19 @@ create_pen_home() {
   sudo -u "$REAL_USER" mkdir -p "${REAL_HOME}/.pen/sandboxes"
 }
 
-symlink_pen_binary
+symlink_pen_binary() {
+  local pen_home="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+  local local_bin="${REAL_HOME}/.local/bin"
+  sudo -u "$REAL_USER" mkdir -p "$local_bin"
+  sudo -u "$REAL_USER" ln -sf "${pen_home}/pen" "${local_bin}/pen"
+
+  echo "Ensure ~/.local/bin is on your PATH. Add to ~/.zshrc, ~/.bashrc, etc.:"
+  echo "  export PATH=\"\${HOME}/.local/bin:\${PATH}\""
+}
+
 install_pfctl_wrapper
 create_pen_home
+symlink_pen_binary
 
 echo ""
 echo "Installation succeeded."
