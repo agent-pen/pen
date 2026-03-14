@@ -25,11 +25,8 @@ symlink_pen_binary() {
   sudo -u "$REAL_USER" mkdir -p "$LOCAL_BIN"
   sudo -u "$REAL_USER" ln -sf "${PEN_HOME}/pen" "${LOCAL_BIN}/pen"
 
-  if ! sudo -u "$REAL_USER" bash -c '[[ ":${PATH}:" == *":'"$LOCAL_BIN"':"* ]]'; then
-    echo "Warning: ${LOCAL_BIN} is not on your PATH."
-    echo "Add it to your shell profile, e.g.:"
-    echo "  export PATH=\"\${HOME}/.local/bin:\${PATH}\""
-  fi
+  echo "Ensure ~/.local/bin is on your PATH. Add to ~/.zshrc, ~/.bashrc, etc.:"
+  echo "  export PATH=\"\${HOME}/.local/bin:\${PATH}\""
 }
 
 secure_pfctl_wrapper() {
@@ -53,4 +50,5 @@ secure_pfctl_wrapper
 write_sudoers_entry
 create_pen_home
 
+echo ""
 echo "Installation succeeded."
