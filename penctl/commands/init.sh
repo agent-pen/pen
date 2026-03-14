@@ -24,7 +24,11 @@ create_default_allowlists() {
 
 create_project_pen_dir() {
   mkdir -p "${PEN_PROJECT}/.pen"
-  printf '\n/.pen/\n' >> "${PEN_PROJECT}/.gitignore"
+
+  cat > "${PEN_PROJECT}/.pen/.gitignore" << 'EOF'
+proxy.pid
+proxy.log
+EOF
 }
 
 abort_if_already_initialized

@@ -34,8 +34,9 @@ sandbox_config_dir() {
   assert_directory_not_empty "$(sandbox_config_dir)"
 }
 
-@test "pen init adds .pen to gitignore" {
-  assert_file_contains "$PROJECT_DIR/.gitignore" "/.pen/"
+@test "pen init gitignores runtime artifacts in .pen" {
+  assert_file_contains "$PROJECT_DIR/.pen/.gitignore" "proxy.pid"
+  assert_file_contains "$PROJECT_DIR/.pen/.gitignore" "proxy.log"
 }
 
 @test "pen init aborts early if sandbox config dir exists" {
