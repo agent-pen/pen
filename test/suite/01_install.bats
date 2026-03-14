@@ -1,15 +1,5 @@
 load test_helper
 
-PROJECT_DIR="$HOME/test-project-install"
-
-setup_file() {
-  create_test_project "$PROJECT_DIR"
-}
-
-teardown_file() {
-  cleanup_test_project "$PROJECT_DIR"
-}
-
 @test "pen command is available" {
   expect_success command -v pen
 }
