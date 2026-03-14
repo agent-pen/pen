@@ -15,30 +15,28 @@ if [[ ! -d "$REAL_HOME" ]]; then
   exit 1
 fi
 
-PEN_HOME="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PFCTL_WRAPPER="${PEN_HOME}/penctl/commands/lib/pfctl-wrapper.sh"
-REAL_UID="$(id -u "$REAL_USER")"
-SUDOERS_FILE="/etc/sudoers.d/pen-${REAL_UID}"
-LOCAL_BIN="${REAL_HOME}/.local/bin"
-
 symlink_pen_binary() {
-  sudo -u "$REAL_USER" mkdir -p "$LOCAL_BIN"
-  sudo -u "$REAL_USER" ln -sf "${PEN_HOME}/pen" "${LOCAL_BIN}/pen"
+  local pen_home="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+  local local_bin="${REAL_HOME}/.local/bin"
+  sudo -u "$REAL_USER" mkdir -p "$local_bin"
+  sudo -u "$REAL_USER" ln -sf "${pen_home}/pen" "${local_bin}/pen"
 
   echo "Ensure ~/.local/bin is on your PATH. Add to ~/.zshrc, ~/.bashrc, etc.:"
   echo "  export PATH=\"\${HOME}/.local/bin:\${PATH}\""
 }
 
-secure_pfctl_wrapper() {
-  chown root:wheel "$PFCTL_WRAPPER"
-  chmod 755 "$PFCTL_WRAPPER"
-}
+install_pfctl_wrapper() {
+  local pen_home="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+  local pfctl_wrapper="${pen_home}/penctl/commands/lib/pfctl-wrapper.sh"
+  chown root:wheel "$pfctl_wrapper"
+  chmod 755 "$pfctl_wrapper"
 
-write_sudoers_entry() {
-  local sudoers_line="${REAL_USER} ALL=(root) NOPASSWD: ${PFCTL_WRAPPER}"
+  local real_uid="$(id -u "$REAL_USER")"
+  local sudoers_file="/etc/sudoers.d/pen-${real_uid}"
+  local sudoers_line="${REAL_USER} ALL=(root) NOPASSWD: ${pfctl_wrapper}"
   echo "$sudoers_line" | visudo -cf /dev/stdin > /dev/null
-  echo "$sudoers_line" > "$SUDOERS_FILE"
-  chmod 440 "$SUDOERS_FILE"
+  echo "$sudoers_line" > "$sudoers_file"
+  chmod 440 "$sudoers_file"
 }
 
 create_pen_home() {
@@ -46,8 +44,7 @@ create_pen_home() {
 }
 
 symlink_pen_binary
-secure_pfctl_wrapper
-write_sudoers_entry
+install_pfctl_wrapper
 create_pen_home
 
 echo ""
