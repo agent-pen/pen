@@ -11,9 +11,11 @@ abort_if_already_initialized() {
   fi
 }
 
-create_default_allowlists() {
+create_sandbox_config_dir() {
   mkdir "$sandbox_config_dir"
+}
 
+create_default_allowlists() {
   cat > "${sandbox_config_dir}/http-allowlist.txt" << 'ALLOWLIST'
 # HTTP(S) proxy allowlist: host:port (one per line, # comments supported)
 # Enforced by the pen egress proxy via hostname matching.
@@ -46,6 +48,7 @@ create_project_pen_dir() {
 }
 
 abort_if_already_initialized
+create_sandbox_config_dir
 create_default_allowlists
 create_project_pen_dir
 echo "Initialisation succeeded."
