@@ -87,3 +87,6 @@
 | 3 | Collapse `./penctl` into project root | Move contents of `penctl/` to the project root to flatten the directory structure | |
 | 4 | Evaluate removing `request()` from egress proxy | Determine whether `request()` can be removed from `penctl/commands/lib/egress-proxy.py` | |
 | 5 | Atomic sudoers write in `install.sh` | Same pattern as `add-test-sudoers.sh` — write to temp file, validate with `visudo -cf`, then `mv` into place | |
+| 6 | Code linting and formatting | Add shellcheck and shfmt (or similar) to enforce consistent style and catch bugs statically | |
+| 7 | Code complexity thresholds | Enforce function length / cyclomatic complexity limits to keep scripts decomposed | |
+| 8 | Automatic code review agent workflow step | Add an agent-driven code review step to the development workflow. Consider adopting an opinionated workflow like [nwave.ai](https://nwave.ai/) | |
