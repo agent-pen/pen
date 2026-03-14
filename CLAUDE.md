@@ -8,6 +8,8 @@ See `README.md` for an overview of pen, prerequisites, installation, and usage. 
 
 See `doc/test-design.md` for test design principles and `doc/testing-strategy.md` for test infrastructure. Run the full e2e suite with `./test.sh`.
 
+A pre-commit hook runs the full test suite on every commit.
+
 ## Architecture
 
 **CLI dispatch**: `pen` resolves subcommands by walking `penctl/commands/` as a directory tree. A command like `pen proxy logs` maps to `penctl/commands/proxy/logs.sh`. The `lib/` directory is excluded from dispatch and contains shared functions and helpers sourced by commands.
