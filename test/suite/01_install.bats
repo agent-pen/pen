@@ -22,6 +22,6 @@ load test_helper
 
 @test "install.sh must be run with sudo" {
   run "$PEN_REPO/install.sh"
-  [[ "$status" -ne 0 ]]
+  assert_failure
   assert_output_contains "must be run with sudo"
 }

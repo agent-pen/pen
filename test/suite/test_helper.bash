@@ -73,6 +73,14 @@ assert_output_contains() {
   }
 }
 
+assert_failure() {
+  if [[ "$status" -eq 0 ]]; then
+    echo "assert_failure: expected non-zero exit, got 0" >&2
+    echo "output: $output" >&2
+    return 1
+  fi
+}
+
 assert_owned_by() {
   local expected_owner="$1" path="$2"
   local actual_owner
