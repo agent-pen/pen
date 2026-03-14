@@ -43,6 +43,18 @@ teardown_file() {
     return 1
   }
 
-  # The script must not be writable by the test user
+  # The script must be owned by root and not writable by the test user
+  local owner
+  owner="$(stat -f '%Su' "$script")"
+  [[ "$owner" == "root" ]] || {
+    echo "Expected owner root, got: $owner" >&2
+    return 1
+  }
   expect_failure test -w "$script"
+}
+
+@test "install.sh must be run with sudo" {
+  run "$PEN_REPO/install.sh"
+  [[ "$status" -ne 0 ]]
+  assert_output_contains "must be run with sudo"
 }
