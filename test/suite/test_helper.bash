@@ -61,6 +61,66 @@ assert_directory_exists() {
   fi
 }
 
+assert_file_exists() {
+  if [[ ! -f "$1" ]]; then
+    echo "assert_file_exists: file not found: $1" >&2
+    return 1
+  fi
+}
+
+assert_directory_not_exists() {
+  if [[ -d "$1" ]]; then
+    echo "assert_directory_not_exists: directory exists: $1" >&2
+    return 1
+  fi
+}
+
+assert_file_not_exists() {
+  if [[ -f "$1" ]]; then
+    echo "assert_file_not_exists: file exists: $1" >&2
+    return 1
+  fi
+}
+
+assert_directory_not_empty() {
+  if [[ ! -d "$1" ]]; then
+    echo "assert_directory_not_empty: directory not found: $1" >&2
+    return 1
+  fi
+  local count
+  count=$(ls "$1" | wc -l)
+  if [[ "$count" -eq 0 ]]; then
+    echo "assert_directory_not_empty: directory is empty: $1" >&2
+    return 1
+  fi
+}
+
+assert_directory_empty() {
+  if [[ ! -d "$1" ]]; then
+    echo "assert_directory_empty: directory not found: $1" >&2
+    return 1
+  fi
+  local count
+  count=$(ls "$1" | wc -l)
+  if [[ "$count" -ne 0 ]]; then
+    echo "assert_directory_empty: directory is not empty: $1" >&2
+    return 1
+  fi
+}
+
+assert_file_contains() {
+  local path="$1" expected="$2"
+  if [[ ! -f "$path" ]]; then
+    echo "assert_file_contains: file not found: $path" >&2
+    return 1
+  fi
+  grep -qF "$expected" "$path" || {
+    echo "assert_file_contains: expected file to contain: $expected" >&2
+    echo "file: $path" >&2
+    return 1
+  }
+}
+
 assert_output_contains() {
   if [[ -z "${output+x}" ]]; then
     echo "assert_output_contains: \$output is not set — did you forget 'run'?" >&2
