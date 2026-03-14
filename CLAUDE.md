@@ -14,7 +14,7 @@ A pre-commit hook runs the full test suite on every commit.
 1. Write the simplest possible test to drive the next tiny increment of functionality. Work backwards from the assertion.
 2. Predict how the test will fail.
 3. Run the test to verify it fails that way.
-4. Implement only the code that addresses the immediate failure. Do not jump ahead — the fix for one failure may reveal the next (e.g. a missing-file failure precedes a missing-content failure). Work through each failure one at a time so that every assertion gets at least one verified failure before being made to pass.
+4. Implement only the code that addresses the immediate failure — nothing more. Do not batch fixes across multiple assertions. If a test has two assertions and the first fails, fix only that. Run again. Let the second assertion fail. Then fix that. Every assertion must get at least one verified failure before being made to pass.
 5. Run the test to verify. If it reveals a new failure, return to step 2.
 
 ## Architecture
