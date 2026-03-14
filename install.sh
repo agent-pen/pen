@@ -39,9 +39,9 @@ secure_pfctl_wrapper() {
 
 write_sudoers_entry() {
   local sudoers_line="${REAL_USER} ALL=(root) NOPASSWD: ${PFCTL_WRAPPER}"
-  echo "$sudoers_line" | tee "$SUDOERS_FILE" > /dev/null
+  echo "$sudoers_line" | visudo -cf /dev/stdin > /dev/null
+  echo "$sudoers_line" > "$SUDOERS_FILE"
   chmod 440 "$SUDOERS_FILE"
-  visudo -cf "$SUDOERS_FILE" > /dev/null 2>&1
 }
 
 create_pen_home() {
