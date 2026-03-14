@@ -25,6 +25,15 @@ cleanup_test_project() {
   rm -rf "$dir"
 }
 
+# List pen-granted NOPASSWD scripts (excludes test infrastructure entries).
+pen_sudoers_scripts() {
+  sudo -l 2>/dev/null \
+    | grep 'NOPASSWD:' \
+    | sed 's/.*NOPASSWD: //' \
+    | grep -v '/install\.sh$' \
+    | grep -v '/uninstall\.sh$'
+}
+
 expect_success() {
   run "$@"
   if [ "$status" -ne 0 ]; then
@@ -57,5 +66,36 @@ assert_output_contains() {
     echo "assert_output_contains: \$output is not set — did you forget 'run'?" >&2
     return 1
   fi
-  [[ "$output" == *"$1"* ]]
+  [[ "$output" == *"$1"* ]] || {
+    echo "assert_output_contains: expected output to contain: $1" >&2
+    echo "actual output: $output" >&2
+    return 1
+  }
+}
+
+assert_owned_by() {
+  local expected_owner="$1" path="$2"
+  local actual_owner
+  actual_owner="$(stat -f '%Su' "$path")"
+  [[ "$actual_owner" == "$expected_owner" ]] || {
+    echo "assert_owned_by: expected owner $expected_owner, got $actual_owner: $path" >&2
+    return 1
+  }
+}
+
+assert_line_count() {
+  local expected="$1" actual="$2" context="${3:-}"
+  [[ "$actual" -eq "$expected" ]] || {
+    echo "assert_line_count: expected $expected, got $actual${context:+ ($context)}" >&2
+    return 1
+  }
+}
+
+assert_glob_match() {
+  local pattern="$1" value="$2"
+  # shellcheck disable=SC2254
+  case "$value" in
+    $pattern) ;;
+    *) echo "assert_glob_match: expected pattern $pattern, got: $value" >&2; return 1 ;;
+  esac
 }
