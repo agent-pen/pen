@@ -14,6 +14,10 @@ teardown_file() {
   expect_success command -v pen
 }
 
+@test "~/.pen directory is created" {
+  expect_success test -d "$HOME/.pen"
+}
+
 @test "only the pfctl wrapper is granted sudoers" {
   # sudo -l lists NOPASSWD entries with full paths — no root access needed.
   # Filter out install.sh and uninstall.sh (granted by test infrastructure, not pen).
