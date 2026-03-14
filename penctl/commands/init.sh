@@ -16,30 +16,10 @@ create_sandbox_config_dir() {
 }
 
 create_default_allowlists() {
-  cat > "${sandbox_config_dir}/http-allowlist.txt" << 'ALLOWLIST'
-# HTTP(S) proxy allowlist: host:port (one per line, # comments supported)
-# Enforced by the pen egress proxy via hostname matching.
+  local defaults_dir="${PEN_HOME}/penctl/defaults"
 
-# Package registries
-registry.npmjs.org:443
-registry.yarnpkg.com:443
-
-# Docker
-auth.docker.io:443
-registry-1.docker.io:443
-production.cloudflare.docker.com:443
-
-# System
-download.docker.com:443
-ports.ubuntu.com:443
-ports.ubuntu.com:80
-ALLOWLIST
-
-  cat > "${sandbox_config_dir}/network-allowlist.txt" << 'ALLOWLIST'
-# IP-based egress rules for non-HTTP protocols (e.g. SSH for git).
-# These bypass the HTTP proxy and go through pf directly (TCP and UDP).
-# Format: ip:port (one per line, # comments supported)
-ALLOWLIST
+  cp "${defaults_dir}/http-allowlist.txt" "${sandbox_config_dir}/http-allowlist.txt"
+  cp "${defaults_dir}/network-allowlist.txt" "${sandbox_config_dir}/network-allowlist.txt"
 }
 
 create_project_pen_dir() {

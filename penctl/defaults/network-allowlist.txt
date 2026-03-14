@@ -1,0 +1,3 @@
+# IP-based egress rules for non-HTTP protocols (e.g. SSH for git).
+# These bypass the HTTP proxy and go through pf directly (TCP and UDP).
+# Format: ip:port (one per line, # comments supported)

@@ -1,0 +1,16 @@
+# HTTP(S) proxy allowlist: host:port (one per line, # comments supported)
+# Enforced by the pen egress proxy via hostname matching.
+
+# Package registries
+registry.npmjs.org:443
+registry.yarnpkg.com:443
+
+# Docker
+auth.docker.io:443
+registry-1.docker.io:443
+production.cloudflare.docker.com:443
+
+# System
+download.docker.com:443
+ports.ubuntu.com:443
+ports.ubuntu.com:80
