@@ -38,6 +38,17 @@ The test deliberately fails if unexpected scripts gain privileges — this is th
 2. **Security invariants** — small dedicated test file asserting exactly which scripts have sudo privileges and that they're tamper-proof. Deliberately brittle — fails if privileges change.
 3. **User-facing paths** (`~/.pen/sandboxes/`) — reference directly in tests; they're part of pen's contract.
 
+## Verify retrofitted tests catch failures
+
+When adding a test for existing behavior, seeing it pass the first time proves nothing — the assertion might be wrong, too loose, or testing the wrong thing. After the first green run:
+
+1. Make the simplest safe production code change that should cause the assertion to fail (e.g. comment out a `mkdir`, rename a path).
+2. Predict how the test will fail (which assertion, what error message).
+3. Run the test and verify it fails the way you predicted.
+4. Undo the production code change.
+
+If the test doesn't fail, or fails differently than expected, the test isn't guarding what you think it is.
+
 ## Test file organization
 
 - One file per command or concern, numbered for execution ordering.

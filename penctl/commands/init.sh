@@ -9,7 +9,7 @@ if [[ -d "$sandbox_config_dir" ]]; then
   exit 0
 fi
 
-mkdir -p "$sandbox_config_dir"
+mkdir "$sandbox_config_dir"
 
 cat > "${sandbox_config_dir}/http-allowlist.txt" << 'ALLOWLIST'
 # HTTP(S) proxy allowlist: host:port (one per line, # comments supported)

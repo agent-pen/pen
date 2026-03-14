@@ -3,7 +3,7 @@ load test_helper
 PROJECT_DIR="$HOME/test-project-install"
 
 setup_file() {
-  setup_test_project "$PROJECT_DIR"
+  create_test_project "$PROJECT_DIR"
 }
 
 teardown_file() {
