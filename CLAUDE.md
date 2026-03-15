@@ -43,3 +43,11 @@ A pre-commit hook runs the full test suite on every commit.
 - **Git commands:** Execute each git command as its own Bash tool call (not chained with `&&` or `;`), so the user can configure persistent permissions for each command independently. Run git commands without `-C` flags — assume the working directory is the repo root.
 - **Document important principles in source-controlled files** (e.g. `CLAUDE.md`) rather than in auto-memory, so they persist long-term and are visible to all contributors.
 - See `doc/code-design.md` for code design principles.
+
+## Automated Code Review
+
+A PostToolUse hook (`.claude/hooks/post-commit-review-gate.sh`) fires after every `git commit`. If the commit message does not contain `[automated subagent code review]`, the agent is reminded to invoke the code-reviewer subagent. The hook is lightweight — all review work happens in the subagent.
+
+The code-reviewer subagent (`.claude/agents/code-reviewer.md`) reviews changed `.sh` and `.bats` files against the project's design principles (`doc/code-design.md`, `doc/test-design.md`). It reads full files (not just diffs), performs mutation testing on new/modified tests, and detects retrofitted tests. The reviewer reports findings but does not fix them — the agent presents findings to the user, who decides what to address.
+
+When committing fixes from code review, include `[automated subagent code review]` in the commit message to skip re-review.

@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-commit-review-gate.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
