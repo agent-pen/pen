@@ -4,9 +4,9 @@ Date: 2026-03-09
 
 ## Status
 
-Accepted
-
 Supercedes [34. Kill proxy in bats teardown to prevent test runner hang](0034-kill-proxy-in-bats-teardown-to-prevent-test-runner-hang.md)
+
+Superceded by [38. Per-test isolation via setup](0038-per-test-isolation-via-setup.md)
 
 ## Context
 

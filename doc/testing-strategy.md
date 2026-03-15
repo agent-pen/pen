@@ -31,10 +31,12 @@ test/
     target-user-guards.sh     # Guard functions sourced by leaf scripts
   suite/
     setup_suite.bash       # Runs install once for the entire suite
-    test_helper.bash       # Assertion and setup helpers
+    test_helper.bash       # Assertion, isolation, and setup helpers
+    clear-pf-anchors.sh   # Privileged: flush pf anchors for invoking user
     01_install.bats        # Install security invariants
     02_init.bats           # pen init
-    98_happy_path.bats     # Full lifecycle: build → exec → stop
+    03_build.bats          # pen build (default and custom Dockerfile)
+    98_happy_path.bats     # Full lifecycle: init → build → exec → stop
     99_uninstall.bats      # Uninstall (runs last)
 ```
 
@@ -44,6 +46,17 @@ Three-phase execution enables interactive debugging:
 3. **Teardown** (`test/libs/privileged/`): Delete test user, clean up
 
 To debug interactively, run setup, drop into a test user shell with `./test-user-shell.sh`, investigate, then teardown.
+
+## Per-test isolation
+
+Every test starts from a clean slate. Each test file defines a `setup()` function that calls `ensure_test_isolation` from `test_helper.bash`. This tears down all pen resources (containers, networks, images, proxy processes, pf anchors, sandbox config directories) by matching the name prefix `pen-user-<uid>-project-`, then recreates the project directory. Tests never depend on state from prior tests, even within the same file. See [ADR 0038](adr/0038-per-test-isolation-via-setup.md).
+
+Cleanup uses prefix-based matching against the container CLI's JSON output rather than mirroring pen's internal name derivation. This avoids coupling tests to implementation details.
+
+Helpers layer preconditions declaratively:
+- `ensure_test_isolation` — clean slate + fresh project directory
+- `ensure_pen_installed` — verify pen is on PATH
+- `ensure_pen_project_initialised` — run `pen init` in the project directory
 
 ## Execution model
 
