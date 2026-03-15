@@ -29,7 +29,7 @@ sandbox_config_dir() {
   assert_directory_exists "$PROJECT_DIR/.pen"
 }
 
-@test "pen init creates sandbox config with allowlists" {
+@test "pen init creates sandbox config directory" {
   assert_directory_exists "$(sandbox_config_dir)"
   assert_directory_not_empty "$(sandbox_config_dir)"
 }
