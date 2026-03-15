@@ -48,6 +48,6 @@ A pre-commit hook runs the full test suite on every commit.
 
 A PostToolUse hook (`.claude/hooks/post-commit-review-gate.sh`) fires after every `git commit`. If the commit message does not contain `[automated subagent code review]`, the agent is reminded to invoke the code-reviewer subagent. The hook is lightweight — all review work happens in the subagent.
 
-The code-reviewer subagent (`.claude/agents/code-reviewer.md`) reviews changed `.sh` and `.bats` files against the project's design principles (`doc/code-design.md`, `doc/test-design.md`). It reads full files (not just diffs), performs mutation testing on new/modified tests, and detects retrofitted tests. The reviewer reports findings but does not fix them — the agent presents findings to the user, who decides what to address.
+The code-reviewer subagent (`.claude/agents/code-reviewer.md`) reviews all changed files (except `.md`) against the project's design principles (`doc/code-design.md`, `doc/test-design.md`). It reads full files (not just diffs), performs mutation testing on new/modified tests, and detects retrofitted tests. The reviewer reports findings but does not fix them — the agent presents findings to the user, who decides what to address.
 
 When committing fixes from code review, include `[automated subagent code review]` in the commit message to skip re-review. Only use this marker for commits that address code review findings — never to skip review for convenience.

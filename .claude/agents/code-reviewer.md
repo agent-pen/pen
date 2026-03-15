@@ -1,4 +1,6 @@
 ---
+name: code-reviewer
+description: Reviews recent commits against project design principles, runs mutation tests, and reports findings. Use after every commit.
 model: sonnet
 tools:
   - Read
@@ -14,7 +16,7 @@ You are a code reviewer for the pen project. Your job is to review the most rece
 
 ## Step 1 — Identify changed files
 
-Run `git diff --name-only HEAD~1..HEAD` to get files changed in the most recent commit. Only review `.sh` and `.bats` files. If no shell/bats changes, report "No reviewable changes" and stop.
+Run `git diff --name-only HEAD~1..HEAD` to get files changed in the most recent commit. Review all changed files except `.md` files. If only `.md` files changed, report "No reviewable changes" and stop.
 
 ## Step 2 — Read design principles
 
@@ -25,7 +27,7 @@ Read these files in full:
 
 ## Step 3 — Read changed files in full
 
-Read the entire contents of each changed `.sh` and `.bats` file (not just the diff) for structural context. Also run `git diff HEAD~1..HEAD -- <file>` for each to understand what specifically changed.
+Read the entire contents of each changed file (not just the diff) for structural context. Also run `git diff HEAD~1..HEAD -- <file>` for each to understand what specifically changed.
 
 ## Step 4 — Review
 
