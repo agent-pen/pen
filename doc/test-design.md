@@ -53,7 +53,7 @@ If the test doesn't fail, or fails differently than expected, the test isn't gua
 
 Use custom assertions to replace low-level test mechanics with intent. Inline `stat`, `wc`, pipe chains, and manual `[[ ]] || { echo ...; return 1; }` blocks add noise — they describe *how* you're checking, not *what* you're checking. A well-named assertion like `assert_owned_by root "$path"` makes the test read as a specification and produces a clear error message on failure ("expected owner root, got pen-test-user: /path") without the test author wiring up error reporting each time.
 
-Add custom assertions to `test/suite/test_helper.bash`.
+Add custom assertions to `test/suite/assertions.bash`.
 
 ## Test file organization
 
