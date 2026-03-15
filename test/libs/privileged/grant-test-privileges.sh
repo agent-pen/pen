@@ -25,6 +25,7 @@ readonly TARGET PEN_SOURCE TARGET_UID SUDOERS_FILE
 PRIVILEGED_SCRIPTS=(
   "$PEN_SOURCE/install.sh"
   "$PEN_SOURCE/uninstall.sh"
+  "$PEN_SOURCE/test/suite/clear-pf-anchors.sh"
 )
 readonly PRIVILEGED_SCRIPTS
 

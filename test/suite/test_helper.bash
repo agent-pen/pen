@@ -25,13 +25,70 @@ cleanup_test_project() {
   rm -rf "$dir"
 }
 
+# Resolve PEN_HOME from the installed pen symlink.
+pen_home() {
+  local pen_path
+  pen_path="$(readlink "$(command -v pen)")"
+  dirname "$pen_path"
+}
+
+# Path to pen's default Dockerfile.
+default_dockerfile_path() {
+  echo "$(pen_home)/penctl/image/Dockerfile"
+}
+
+# Remove all pen containers, networks, images, proxy processes, and pf anchors.
+# Uses a prefix-based approach so tests don't couple to pen's name derivation.
+ensure_test_isolation() {
+  local dir="$1"
+  local prefix="pen-user-$(id -u)-project-"
+
+  # Stop and delete containers
+  container list --format json 2>/dev/null \
+    | jq -r '.[].configuration.id // empty' \
+    | grep "^${prefix}" \
+    | while IFS= read -r name; do
+        container delete --force "$name" 2>/dev/null || true
+      done || true
+
+  # Delete networks (skip "default")
+  container network list --format json 2>/dev/null \
+    | jq -r '.[].id // empty' \
+    | grep "^${prefix}" \
+    | while IFS= read -r name; do
+        container network delete "$name" 2>/dev/null || true
+      done || true
+
+  # Delete images
+  container image list --format json 2>/dev/null \
+    | jq -r '.[].reference // empty' \
+    | grep "^${prefix}" \
+    | while IFS= read -r ref; do
+        container image delete --force "$ref" 2>/dev/null || true
+      done || true
+
+  # Kill mitmdump processes and wait for them to exit
+  pkill -f mitmdump 2>/dev/null || true
+  while pgrep -f mitmdump > /dev/null 2>&1; do
+    sleep 0.1
+  done
+
+  # Flush pf anchors
+  sudo "$HOME/pen-source/test/suite/clear-pf-anchors.sh"
+
+  # Clean up project-level overrides
+  rm -f "$dir/.pen/Dockerfile"
+
+}
+
 # List pen-granted NOPASSWD scripts (excludes test infrastructure entries).
 pen_sudoers_scripts() {
   sudo -l 2>/dev/null \
     | grep 'NOPASSWD:' \
     | sed 's/.*NOPASSWD: //' \
     | grep -v '/install\.sh$' \
-    | grep -v '/uninstall\.sh$'
+    | grep -v '/uninstall\.sh$' \
+    | grep -v '/clear-pf-anchors\.sh$'
 }
 
 expect_success() {
