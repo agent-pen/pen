@@ -64,7 +64,10 @@ Add custom assertions to `test/suite/test_helper.bash`.
 - Files in between (02–98) test individual pen commands, each independent.
 - No reliance on `setup_suite` for assertions — bats only supports assertions inside `@test` blocks.
 
-**Project setup helpers**: `create_test_project` verifies pen is installed (`command -v pen`) and creates a fresh project directory. `setup_test_project` extends this by also running `pen init`. The install check is a guard — if `setup_suite` didn't run or install is broken, `setup_file` fails and the entire file is skipped with a clear error. Files that test `pen init` itself use `create_test_project` and call `pen init` explicitly in the test.
+**Setup helpers** layer preconditions declaratively in each file's `setup()`:
+- `ensure_test_isolation` — tears down all pen resources by prefix and recreates the project directory. Every test file calls this.
+- `ensure_pen_installed` — verifies pen is on PATH. A guard so failures are clear if `setup_suite` didn't run.
+- `ensure_pen_project_initialised` — runs `pen init` in the project directory. Used by files that need an initialized project (e.g. build tests). Files that test `pen init` itself call it explicitly in the test body.
 
 ## Bats gotchas
 
