@@ -1,28 +1,17 @@
 # Shared helpers for pen e2e tests.
 # Loaded explicitly by each .bats file.
 
-# Verify install succeeded and create a fresh project directory.
-# Caller sets PROJECT_DIR at file scope before calling.
-create_test_project() {
+project_dir() {
+  echo "$HOME/test-project"
+}
+
+ensure_pen_installed() {
   command -v pen > /dev/null
-  rm -rf "$1"
-  mkdir -p "$1"
 }
 
-# create_test_project + pen init. Use when tests need an initialized project.
-setup_test_project() {
-  create_test_project "$1"
-  cd "$1"
+ensure_pen_project_initialised() {
+  cd "$(project_dir)"
   pen init
-}
-
-cleanup_test_project() {
-  local dir="$1"
-  local proxy_pid_file="${dir}/.pen/proxy.pid"
-  if [[ -f "$proxy_pid_file" ]]; then
-    kill "$(cat "$proxy_pid_file")" 2>/dev/null || true
-  fi
-  rm -rf "$dir"
 }
 
 # Resolve PEN_HOME from the installed pen symlink.
@@ -37,10 +26,9 @@ default_dockerfile_path() {
   echo "$(pen_home)/penctl/image/Dockerfile"
 }
 
-# Remove all pen containers, networks, images, proxy processes, and pf anchors.
+# Reset all pen state so each test starts from a clean slate.
 # Uses a prefix-based approach so tests don't couple to pen's name derivation.
 ensure_test_isolation() {
-  local dir="$1"
   local prefix="pen-user-$(id -u)-project-"
 
   # Stop and delete containers
@@ -51,7 +39,7 @@ ensure_test_isolation() {
         container delete --force "$name" 2>/dev/null || true
       done || true
 
-  # Delete networks (skip "default")
+  # Delete networks
   container network list --format json 2>/dev/null \
     | jq -r '.[].id // empty' \
     | grep "^${prefix}" \
@@ -73,12 +61,19 @@ ensure_test_isolation() {
     sleep 0.1
   done
 
-  # Flush pf anchors
+  # Clear pf anchors
   sudo "$HOME/pen-source/test/suite/clear-pf-anchors.sh"
 
-  # Clean up project-level overrides
-  rm -f "$dir/.pen/Dockerfile"
+  # Remove sandbox config directories
+  local config_dir
+  for config_dir in "$HOME"/.pen/sandboxes/${prefix}*; do
+    [[ -d "$config_dir" ]] && rm -rf "$config_dir"
+  done
 
+  # Recreate project directory
+  rm -rf "$(project_dir)"
+  mkdir -p "$(project_dir)"
+  cd "$(project_dir)"
 }
 
 # List pen-granted NOPASSWD scripts (excludes test infrastructure entries).

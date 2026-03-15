@@ -1,5 +1,9 @@
 load test_helper
 
+setup() {
+  ensure_test_isolation
+}
+
 @test "pen command is available" {
   expect_success command -v pen
 }
