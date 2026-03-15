@@ -16,14 +16,21 @@ fi
 
 pen_teardown
 
-# --- 1. Create network ---
+# --- 1. Verify image exists ---
+
+if ! container image list --format json | jq -e --arg name "$container_name" '.[] | select(.reference | startswith($name))' > /dev/null 2>&1; then
+  echo "Image not found: ${container_name}. Run 'pen build' first." >&2
+  exit 1
+fi
+
+# --- 2. Create network ---
 
 max_subnet=$(container network ls | grep 192.168. | sed -r 's/.+192\.168\.([0-9]+).0\/24/\1/' | sort -r | head -1)
 subnet="192.168.$((max_subnet + 1)).0/24"
 echo "Creating network..."
 container network create --subnet "${subnet}" "$network" > /dev/null
 
-# --- 2. Start container ---
+# --- 3. Start container ---
 
 echo "Starting container..."
 gateway="${subnet%.0/24}.1"
@@ -43,13 +50,13 @@ container run \
   --volume "${PEN_PROJECT}:${PEN_PROJECT}" \
   "${container_name}" > /dev/null
 
-# --- 3. Inspect container for pf rules ---
+# --- 4. Inspect container for pf rules ---
 
 container_ip=$(container inspect "$target" | jq -r '.[0].networks[0].ipv4Address | split("/")[0]')
 bridge_iface=$(route -n get "$container_ip" | awk '/interface:/ {print $2}')
 
 
-# --- 4. Apply pf rules ---
+# --- 5. Apply pf rules ---
 
 pf_rules="pass in quick on ${bridge_iface} from ${container_ip} to ${subnet}
 pass in quick on ${bridge_iface} proto { tcp udp } from ${container_ip} to ${dns_host} port 53
@@ -73,7 +80,7 @@ block in quick on ${bridge_iface} from ${subnet} to any"
 
 echo "$pf_rules" | sudo "$pfctl_wrapper" load "$pf_anchor"
 
-# --- 5. Start proxy in background ---
+# --- 6. Start proxy in background ---
 
 
 export PEN_ALLOWLIST_PATH="${sandbox_config_dir}/http-allowlist.txt"
@@ -95,7 +102,7 @@ for i in $(seq 1 30); do
   sleep 0.2
 done
 
-# --- 6. Configure SSH ---
+# --- 7. Configure SSH ---
 
 container exec "$target" bash -c "
   mkdir -p ~/.ssh && chmod 700 ~/.ssh
