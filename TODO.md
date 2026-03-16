@@ -47,6 +47,7 @@
 | 5 | `pen config backup` | Pull live config from `$HOME/.pen/sandboxes/<sandbox-id>/` back into `.pen/` in the project repo, so it can be checked into version control | |
 | 6 | Git-ignore only runtime artifacts in `.pen/` | `.pen/` now stores both checked-in config (allowlists) and runtime artifacts. Only git-ignore log and PID files, not the entire `.pen/` directory | Config tampering: fully git-ignored `.pen/` hides agent modifications to project-sited config |
 | 7 | Stop all pen instances before uninstall | `uninstall.sh` should stop all running pen sandboxes for the user before removing pen | |
+| 8 | Auto-build on `pen start` if no image | `start.sh` currently fails with "Image not found" if no image exists. Instead, auto-run `pen build` with the default Dockerfile so `pen exec` / `pen shell` work without a separate build step | |
 
 ## Documentation
 
