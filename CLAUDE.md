@@ -10,6 +10,8 @@ See `doc/test-design.md` for test design principles and `doc/testing-strategy.md
 
 A pre-commit hook runs the full test suite on every commit.
 
+**Never remove test coverage without user confirmation.** Production code changes — even ones that appear to invalidate a test — may be temporary spikes. Tests are load-bearing; removing them should be a deliberate decision, not a side effect.
+
 **Strict TDD.** All functional changes must be test-driven:
 1. Write the simplest possible test to drive the next tiny increment of functionality. Work backwards from the assertion.
 2. Predict how the test will fail.

@@ -10,6 +10,10 @@ Tests should assert what pen *does*, not how it's wired internally.
 - **Bad**: assert a file is owned by root. **Good**: prove the test user cannot modify it.
 - Minimize coupling to internal paths and file structures — they change; behavior contracts don't.
 
+**Assert on state, not diagnostic text.** Log messages, progress output, and error wording are implementation details — they can change without changing behavior. Assert on actual state changes instead. For example, to verify a sandbox is reused across exec calls, don't check for absence of "Starting container..." in output — create a file inside the container and verify it persists on the next call.
+
+**Rule out coincidental success.** An assertion that passes without the intended behavior actually working is worthless. Ask: could this pass for the wrong reason? `expect_success pen exec test -f "$path"` at a path that exists on both the host and the container proves nothing — it could be running on the host. `pen exec uname` returning `Linux` on a macOS host can only succeed inside the container.
+
 ## When implementation coupling is unavoidable (security invariants)
 
 Some security properties are silent failures — pen works fine but is insecure. These can't be tested through normal usage, so tests must inspect implementation details. For security, err on the side of brittleness — a test that breaks when privileges change is a feature, not a bug.
@@ -19,6 +23,12 @@ Some security properties are silent failures — pen works fine but is insecure.
 2. That script is not writable by the test user.
 
 The test deliberately fails if unexpected scripts gain privileges — this is the right trade-off for security-critical assertions.
+
+## One behavior per test
+
+Each test should verify one coherent behavior at the granularity of the function under test. This may require multiple assertions — that's fine when they collectively verify a single behavior. But don't pack unrelated concerns into one test. Stdout passthrough, stderr passthrough, and exit code propagation are separate behaviors — separate tests. "Runs inside a container" and "project directory is mounted" are separate behaviors — separate tests.
+
+When a test fails, the name alone should tell you what broke.
 
 ## Stable vs. unstable interfaces
 
@@ -53,11 +63,15 @@ If the test doesn't fail, or fails differently than expected, the test isn't gua
 
 Use custom assertions to replace low-level test mechanics with intent. Inline `stat`, `wc`, pipe chains, and manual `[[ ]] || { echo ...; return 1; }` blocks add noise — they describe *how* you're checking, not *what* you're checking. A well-named assertion like `assert_owned_by root "$path"` makes the test read as a specification and produces a clear error message on failure ("expected owner root, got pen-test-user: /path") without the test author wiring up error reporting each time.
 
+**Assert specific values, not categories.** `assert_exit_code 42` catches more regressions than `expect_failure`. A command that exits 1 instead of 42 is a different bug — "non-zero" misses it.
+
 Add custom assertions to `test/suite/assertions.bash`.
 
 ## Test file organization
 
 - One file per command or concern, numbered for execution ordering.
+- **Lead with the happy path.** The first test in a file should demonstrate the command's primary purpose. A reader should understand what the command does from the first `@test` alone.
+- **Name tests for user-facing purpose, not mechanism.** "pen exec runs command in project-specific container" (purpose) over "pen exec can see the project directory" (mechanism).
 - `setup_suite` runs `pen install` once for the entire suite.
 - `01_install.bats` — install-specific assertions (security invariants). Does not run install itself.
 - `99_uninstall.bats` — uninstall assertions (runs last; uninstall would break subsequent files).
