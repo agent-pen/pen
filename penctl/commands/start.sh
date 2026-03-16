@@ -25,15 +25,15 @@ fi
 
 # --- 2. Create network ---
 
-max_subnet=$(container network ls | grep 192.168. | sed -r 's/.+192\.168\.([0-9]+).0\/24/\1/' | sort -r | head -1)
-subnet="192.168.$((max_subnet + 1)).0/24"
 echo "Creating network..."
-container network create --subnet "${subnet}" "$network" > /dev/null
+container network create "$network" > /dev/null
+network_json=$(container network list --format json | jq --arg name "$network" '.[] | select(.id == $name)')
+subnet=$(echo "$network_json" | jq -r '.status.ipv4Subnet')
+gateway=$(echo "$network_json" | jq -r '.status.ipv4Gateway')
 
 # --- 3. Start container ---
 
 echo "Starting container..."
-gateway="${subnet%.0/24}.1"
 proxy_host="${gateway}"   # proxy binds to the gateway IP
 dns_host="${gateway}"     # Apple containerization runs DNS on the gateway IP
 container run \
