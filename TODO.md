@@ -48,6 +48,7 @@
 | 6 | Git-ignore only runtime artifacts in `.pen/` | `.pen/` now stores both checked-in config (allowlists) and runtime artifacts. Only git-ignore log and PID files, not the entire `.pen/` directory | Config tampering: fully git-ignored `.pen/` hides agent modifications to project-sited config |
 | 7 | Stop all pen instances before uninstall | `uninstall.sh` should stop all running pen sandboxes for the user before removing pen | |
 | 8 | Auto-build on `pen start` if no image | `start.sh` currently fails with "Image not found" if no image exists. Instead, auto-run `pen build` with the default Dockerfile so `pen exec` / `pen shell` work without a separate build step | |
+| 9 | Fail `pen build` and `pen start` if `pen init` not run | Guard against running pen in the wrong directory. Check that `pen init` has been run for the current directory before allowing `pen build` or `pen start` to proceed | |
 
 ## Documentation
 
@@ -77,6 +78,12 @@
 | # | Item | Notes | Security Concern? |
 |---|------|-------|-------------------|
 | 1 | Investigate adding Apple `container` CLI to Brewfile | Compatibility with existing direct installs is unknown — may conflict | |
+
+## Bugs
+
+| # | Item | Notes | Security Concern? |
+|---|------|-------|-------------------|
+| 1 | Support directories with dot (`.`) in name | `common.sh` uses `basename "$PEN_PROJECT"` in the container name, which can include dots. Dots are invalid in container/image references — e.g. directory `tmp.OlZ2tz4L7L` produces `pen-user-502-project-tmp.OlZ2tz4L7L-61c362`, causing `Error: invalid reference`. Sanitize or replace dots in the basename | |
 
 ## Code quality
 
