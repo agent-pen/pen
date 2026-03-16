@@ -71,6 +71,7 @@
 | 12 | Sanitize pfctl anchor suffix in `pfctl-wrapper.sh` | Anchor name is only prefix-checked. Add a character class validation (e.g. `[a-zA-Z0-9._-]`) to prevent unexpected characters reaching `pfctl -a` | Privilege escalation: unconstrained suffix passed to root-executed pfctl |
 | 13 | Avoid macOS GUI authorization prompt when test source files change | Changing test source files triggers a macOS dialog asking the user to authorize the terminal app. Investigate granting Full Disk Access or Developer Tool access to the terminal to suppress this | |
 | 15 | Parallel test execution with bats `--jobs` | Tests already use per-test isolation via `ensure_test_isolation`. Enable `--jobs N` for parallel file/method execution. Needs: separate project directory per test method (not just per file), and install/uninstall tests excluded from parallel runs or rearchitected | |
+| 16 | Retain test user across development runs | Skip test user creation/deletion during `./test.sh` when the test user already exists, saving ~15s. Pre-commit hook and CI must always do a full recreation for isolation. Needs: a mode flag or separate entry point, and a reset mechanism to clear stale sandbox state without recreating the account | |
 
 ## Dependencies
 
