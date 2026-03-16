@@ -14,6 +14,12 @@ Tests should assert what pen *does*, not how it's wired internally.
 
 **Rule out coincidental success.** An assertion that passes without the intended behavior actually working is worthless. Ask: could this pass for the wrong reason? `expect_success pen exec test -f "$path"` at a path that exists on both the host and the container proves nothing — it could be running on the host. `pen exec uname` returning `Linux` on a macOS host can only succeed inside the container.
 
+## Production code is only the test subject, never test infrastructure
+
+Test orchestration and verification must not source, call, or depend on production code. Production code may only be interacted with as the *subject* of a test — through the CLI or other user-facing interfaces. Test helpers that need to derive names, inspect state, or clean up resources must duplicate the relevant logic independently. This duplication is intentional: if production naming changes, the naming contract verification in `setup_suite` fails, making the divergence immediately visible rather than silently inherited.
+
+**Example**: `test_sandbox_name` in `test_helper.bash` duplicates the hash-based naming from `common.sh`. Tests call `pen init` / `pen build` / `pen exec` (production code as subject), then use `test_sandbox_name` (independent test logic) to verify the resulting resource names. Similarly, `cleanup_sandbox` tears down resources using low-level `container` commands rather than calling `pen stop`.
+
 ## When implementation coupling is unavoidable (security invariants)
 
 Some security properties are silent failures — pen works fine but is insecure. These can't be tested through normal usage, so tests must inspect implementation details. For security, err on the side of brittleness — a test that breaks when privileges change is a feature, not a bug.
