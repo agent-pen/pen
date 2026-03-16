@@ -7,7 +7,7 @@ project_dir() {
 
 # --- Name derivation helpers ---
 # Duplicates production logic (common.sh) intentionally — tests should not
-# depend on production code. Naming tests verify these stay in sync.
+# depend on production code. setup_suite verifies these stay in sync.
 
 test_sandbox_prefix() {
   echo "pen-user-$(id -u)-project-"
@@ -45,11 +45,10 @@ ensure_pen_project_built() {
   pen build
 }
 
-# Tear down resources for THIS test's project dir only.
+# Tear down all sandbox resources for a given project directory.
 # Uses low-level commands — no production code (pen stop).
-cleanup_test_resources() {
-  local dir
-  dir="$(project_dir)"
+cleanup_sandbox() {
+  local dir="$1"
 
   local target
   target="$(test_container_name "$dir")"
@@ -72,24 +71,19 @@ cleanup_test_resources() {
   rm -rf "$(test_sandbox_config_dir "$dir")" 2>/dev/null || true
 }
 
+# Tear down resources for THIS test's project dir.
+cleanup_test_resources() {
+  cd "$HOME"
+  cleanup_sandbox "$(project_dir)"
+}
+
 # Clean slate for a test method. Creates project dir, precautionary cleanup
 # of stale resources (supports rerunning without prior teardown).
 ensure_test_isolation() {
+  cd "$HOME"
   mkdir -p "$(project_dir)"
   cd "$(project_dir)"
-
-  # Precautionary cleanup of stale resources from a previous run
-  # (e.g. interactive debugging where teardown didn't complete).
-  # Critical: flush pf anchor to prevent stale rules from interfering.
-  local dir
-  dir="$(project_dir)"
-  local anchor
-  anchor="$(test_pf_anchor "$dir")"
-  container delete --force "$(test_container_name "$dir")" 2>/dev/null || true
-  sudo "$HOME/pen-source/penctl/commands/lib/pfctl-wrapper.sh" flush "$anchor" 2>/dev/null || true
-  container network delete "$(test_network_name "$dir")" 2>/dev/null || true
-  container image delete --force "$(test_sandbox_name "$dir")" 2>/dev/null || true
-  rm -rf "$(test_sandbox_config_dir "$dir")" 2>/dev/null || true
+  cleanup_sandbox "$(project_dir)"
 }
 
 # --- Utility helpers ---
@@ -113,7 +107,10 @@ pen_sudoers_scripts() {
     | sed 's/.*NOPASSWD: //' \
     | grep -v '/install\.sh$' \
     | grep -v '/uninstall\.sh$' \
-    | grep -v '/clear-pf-anchors\.sh$'
+    | grep -v '/clear-pf-anchors\.sh$' \
+    | grep -v '/check-pf-anchor\.sh$'
 }
 
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/assertions.bash"
+SUITE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SUITE_DIR}/assertions.bash"
+source "${SUITE_DIR}/container-assertions.bash"

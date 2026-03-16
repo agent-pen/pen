@@ -2,6 +2,34 @@ source "$(dirname "${BASH_SOURCE[0]}")/test_helper.bash"
 
 setup_suite() {
   sudo "$PEN_REPO/install.sh"
+  verify_naming_contract
+}
+
+# Verify test helper name derivation matches production naming.
+# Creates a temporary sandbox, checks all resource names, then tears down.
+# Fails fast — if naming is out of sync, no tests will run.
+verify_naming_contract() {
+  local verify_dir
+  verify_dir="$(mktemp -d)/test-project"
+  mkdir -p "$verify_dir"
+
+  local sandbox_name
+  sandbox_name="$(test_sandbox_name "$verify_dir")"
+
+  cd "$verify_dir"
+  pen init
+  pen build
+  pen exec true
+
+  assert_container_exists "$(test_container_name "$verify_dir")"
+  assert_network_exists "$(test_network_name "$verify_dir")"
+  assert_image_exists "${sandbox_name}:latest"
+  assert_pf_anchor_exists "$(test_pf_anchor "$verify_dir")"
+  assert_directory_exists "$(test_sandbox_config_dir "$verify_dir")"
+
+  cd "$HOME"
+  cleanup_sandbox "$verify_dir"
+  rm -rf "$verify_dir"
 }
 
 # Safety-net sweep: clean up any resources leaked by tests that crashed

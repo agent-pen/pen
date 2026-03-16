@@ -80,7 +80,7 @@ Add custom assertions to `test/suite/assertions.bash`.
 
 **Per-test isolation model**: Each test method gets its own unique project directory (`${BATS_TEST_TMPDIR}/test-project`). Since sandbox identity is derived from the project path (container name, network, pf anchor, image, config dir), unique project dirs mean fully namespaced resources with no cross-test interference. This is a prerequisite for parallel execution with `bats --jobs`.
 
-**Name derivation helpers** (`test_sandbox_name`, `test_container_name`, etc.) in `test_helper.bash` duplicate production naming logic intentionally — tests should not depend on production code. Contract tests in `02_naming.bats` verify these stay in sync with pen's actual resource names.
+**Name derivation helpers** (`test_sandbox_name`, `test_container_name`, etc.) in `test_helper.bash` duplicate production naming logic intentionally — tests should not depend on production code. `setup_suite` verifies these stay in sync with pen's actual resource names by creating a temporary sandbox and asserting all resource names match — if naming is out of sync, the suite aborts before any tests run.
 
 **Setup helpers** layer preconditions declaratively in each file's `setup()`:
 - `ensure_test_isolation` — creates a unique project directory and does precautionary cleanup of stale resources for this test's project path. Every test file calls this.

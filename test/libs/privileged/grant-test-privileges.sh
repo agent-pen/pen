@@ -26,6 +26,7 @@ PRIVILEGED_SCRIPTS=(
   "$PEN_SOURCE/install.sh"
   "$PEN_SOURCE/uninstall.sh"
   "$PEN_SOURCE/test/suite/clear-pf-anchors.sh"
+  "$PEN_SOURCE/test/suite/check-pf-anchor.sh"
 )
 readonly PRIVILEGED_SCRIPTS
 
