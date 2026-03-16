@@ -2,7 +2,6 @@ load test_helper
 
 setup() {
   ensure_test_isolation
-  ensure_pen_installed
   ensure_pen_project_initialised
 }
 

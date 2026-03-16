@@ -10,6 +10,7 @@ ensure_pen_installed() {
 }
 
 ensure_pen_project_initialised() {
+  ensure_pen_installed
   cd "$(project_dir)"
   pen init
 }
