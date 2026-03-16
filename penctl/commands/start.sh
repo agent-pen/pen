@@ -27,9 +27,12 @@ fi
 
 echo "Creating network..."
 container network create "$network" > /dev/null
-network_json=$(container network list --format json | jq --arg name "$network" '.[] | select(.id == $name)')
-subnet=$(echo "$network_json" | jq -r '.status.ipv4Subnet')
-gateway=$(echo "$network_json" | jq -r '.status.ipv4Gateway')
+read -r subnet gateway < <(
+  container network list --format json \
+    | jq -r --arg name "$network" '.[] | select(.id == $name) | "\(.status.ipv4Subnet) \(.status.ipv4Gateway)"'
+)
+[[ -n "$subnet" && "$subnet" != "null" ]] || { echo "Failed to read subnet for network ${network}" >&2; exit 1; }
+[[ -n "$gateway" && "$gateway" != "null" ]] || { echo "Failed to read gateway for network ${network}" >&2; exit 1; }
 
 # --- 3. Start container ---
 
