@@ -21,7 +21,7 @@ fi
 
 # Run parallelisable tests (01–98).
 parallel_files=("$SUITE_DIR"/[0-8]*.bats "$SUITE_DIR"/9[0-8]*.bats)
-bats "${parallel_files[@]}"
+bats --jobs "$(sysctl -n hw.ncpu)" "${parallel_files[@]}"
 
 # Run uninstall tests serially — must run after all others.
 bats "$SUITE_DIR/99_uninstall.bats"

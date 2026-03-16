@@ -73,7 +73,7 @@ Privileged test scripts use multiple layers of protection:
 
 ## Known issues
 
-- **No parallel test runs** — `test.sh` uses a PID-based lock file (`test/.lock`, gitignored) to prevent concurrent runs. A second invocation fails immediately with an error. Stale locks from crashed runs are detected and cleaned up automatically.
+- **No concurrent `test.sh` invocations** — `test.sh` uses a PID-based lock file (`test/.lock`, gitignored) to prevent concurrent runs. A second invocation fails immediately with an error. Stale locks from crashed runs are detected and cleaned up automatically.
 - **Cloudflare WARP conflicts with container DNS** — disable WARP before running tests
 - **Launchd domains survive user deletion** — `delete-test-account.sh` runs `launchctl bootout user/<uid>` after deletion to clean up orphaned domains
 - **Changing the test username requires a reboot** — the container apiserver caches per-UID state in memory
