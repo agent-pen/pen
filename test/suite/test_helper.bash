@@ -35,8 +35,13 @@ ensure_pen_installed() {
 }
 
 ensure_pen_image_available() {
+  local prebuilt_image_file=/tmp/pen-test-prebuilt-image
+  if [[ ! -f "$prebuilt_image_file" ]]; then
+    echo "ensure_pen_image_available: $prebuilt_image_file not found — was setup_suite run?" >&2
+    return 1
+  fi
   local prebuilt_image
-  prebuilt_image="$(cat /tmp/pen-test-prebuilt-image)"
+  prebuilt_image="$(cat "$prebuilt_image_file")"
   local sandbox_name
   sandbox_name="$(test_sandbox_name "$(project_dir)")"
   container image tag "$prebuilt_image" "${sandbox_name}:latest"
@@ -46,6 +51,7 @@ ensure_pen_project_initialised() {
   ensure_pen_installed
   cd "$(project_dir)"
   pen init
+  # Pre-tag so container build reuses cached layers instead of rebuilding.
   ensure_pen_image_available
 }
 
@@ -56,8 +62,12 @@ ensure_pen_project_built() {
 
 # Tear down all sandbox resources for a given project directory.
 # Uses low-level commands — no production code (pen stop).
+# Pass --keep-image to skip image deletion (used by setup_suite to
+# preserve the pre-built image for test reuse).
 cleanup_sandbox() {
   local dir="$1"
+  local keep_image=false
+  [[ "${2:-}" == "--keep-image" ]] && keep_image=true
 
   local target
   target="$(test_container_name "$dir")"
@@ -76,7 +86,9 @@ cleanup_sandbox() {
   network="$(test_network_name "$dir")"
   container network delete "$network" 2>/dev/null || true
 
-  container image delete --force "$(test_sandbox_name "$dir")" 2>/dev/null || true
+  if [[ "$keep_image" == false ]]; then
+    container image delete --force "$(test_sandbox_name "$dir")" 2>/dev/null || true
+  fi
   rm -rf "$(test_sandbox_config_dir "$dir")" 2>/dev/null || true
 }
 

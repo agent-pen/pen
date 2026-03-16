@@ -59,14 +59,7 @@ verify_naming_contract() {
 
   # Clean up everything except the image — tests will reuse it.
   cd "$HOME"
-  container delete --force "$container_name" 2>/dev/null || true
-  local proxy_pid_file="${verify_dir}/.pen/proxy.pid"
-  if [[ -f "$proxy_pid_file" ]]; then
-    kill "$(cat "$proxy_pid_file")" 2>/dev/null || true
-  fi
-  sudo "$PEN_REPO/test/suite/pf-anchor.sh" flush "$anchor" 2>/dev/null || true
-  container network delete "$network_name" 2>/dev/null || true
-  rm -rf "$config_dir" 2>/dev/null || true
+  cleanup_sandbox "$verify_dir" --keep-image
 
   # Verify flush actually cleared the anchor.
   assert_pf_anchor_not_exists "$anchor"
