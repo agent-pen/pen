@@ -76,7 +76,7 @@ Add custom assertions to `test/suite/assertions.bash`.
 - `01_install.bats` — install-specific assertions (security invariants). Does not run install itself.
 - `99_uninstall.bats` — uninstall assertions (runs last; uninstall would break subsequent files).
 - Files in between (02–98) test individual pen commands, each independent.
-- No reliance on `setup_suite` for assertions — bats only supports assertions inside `@test` blocks.
+- `setup_suite` may use assertions as precondition guards (e.g. verifying naming contract) that abort the suite early. These are not test assertions — they verify infrastructure prerequisites. Bats reports `setup_suite` failures but without per-assertion detail, so guard failure messages must be self-explanatory.
 
 **Per-test isolation model**: Each test method gets its own unique project directory (`${BATS_TEST_TMPDIR}/test-project`). Since sandbox identity is derived from the project path (container name, network, pf anchor, image, config dir), unique project dirs mean fully namespaced resources with no cross-test interference. This is a prerequisite for parallel execution with `bats --jobs`.
 

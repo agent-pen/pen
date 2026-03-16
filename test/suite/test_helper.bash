@@ -61,7 +61,7 @@ cleanup_sandbox() {
 
   local anchor
   anchor="$(test_pf_anchor "$dir")"
-  sudo "$HOME/pen-source/penctl/commands/lib/pfctl-wrapper.sh" flush "$anchor" 2>/dev/null || true
+  sudo "$PEN_REPO/penctl/commands/lib/pfctl-wrapper.sh" flush "$anchor" 2>/dev/null || true
 
   local network
   network="$(test_network_name "$dir")"

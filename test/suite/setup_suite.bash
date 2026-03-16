@@ -69,7 +69,7 @@ teardown_suite() {
   done
 
   # Clear pf anchors
-  sudo "$HOME/pen-source/test/suite/clear-pf-anchors.sh"
+  sudo "$PEN_REPO/test/suite/clear-pf-anchors.sh"
 
   # Remove sandbox config directories
   local config_dir

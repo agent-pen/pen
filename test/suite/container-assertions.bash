@@ -39,7 +39,7 @@ assert_image_exists() {
 
 assert_pf_anchor_exists() {
   local anchor="$1"
-  sudo "$HOME/pen-source/test/suite/check-pf-anchor.sh" "$anchor" || {
+  sudo "$PEN_REPO/test/suite/check-pf-anchor.sh" "$anchor" || {
     echo "assert_pf_anchor_exists: anchor has no rules: $anchor" >&2
     return 1
   }
