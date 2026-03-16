@@ -98,13 +98,13 @@ cleanup_test_resources() {
   cleanup_sandbox "$(project_dir)"
 }
 
-# Clean slate for a test method. Creates project dir, precautionary cleanup
-# of stale resources (supports rerunning without prior teardown).
+# Clean slate for a test method. Creates project dir and cd into it.
+# No precautionary cleanup needed — BATS_TEST_TMPDIR is unique per run
+# (created via mktemp), so stale resources from prior runs cannot exist.
 ensure_test_isolation() {
   cd "$HOME"
   mkdir -p "$(project_dir)"
   cd "$(project_dir)"
-  cleanup_sandbox "$(project_dir)"
 }
 
 # --- Utility helpers ---
