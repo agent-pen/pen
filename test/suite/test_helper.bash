@@ -34,10 +34,19 @@ ensure_pen_installed() {
   command -v pen > /dev/null
 }
 
+ensure_pen_image_available() {
+  local prebuilt_image
+  prebuilt_image="$(cat /tmp/pen-test-prebuilt-image)"
+  local sandbox_name
+  sandbox_name="$(test_sandbox_name "$(project_dir)")"
+  container image tag "$prebuilt_image" "${sandbox_name}:latest"
+}
+
 ensure_pen_project_initialised() {
   ensure_pen_installed
   cd "$(project_dir)"
   pen init
+  ensure_pen_image_available
 }
 
 ensure_pen_project_built() {
