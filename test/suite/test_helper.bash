@@ -14,6 +14,11 @@ ensure_pen_project_initialised() {
   pen init
 }
 
+ensure_pen_project_built() {
+  ensure_pen_project_initialised
+  pen build
+}
+
 # Resolve PEN_HOME from the installed pen symlink.
 pen_home() {
   local pen_path

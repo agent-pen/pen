@@ -100,12 +100,33 @@ assert_output_contains() {
   }
 }
 
+assert_stderr_contains() {
+  if [[ -z "${stderr+x}" ]]; then
+    echo "assert_stderr_contains: \$stderr is not set — did you forget 'run --separate-stderr'?" >&2
+    return 1
+  fi
+  [[ "$stderr" == *"$1"* ]] || {
+    echo "assert_stderr_contains: expected stderr to contain: $1" >&2
+    echo "actual stderr: $stderr" >&2
+    return 1
+  }
+}
+
 assert_failure() {
   if [[ "$status" -eq 0 ]]; then
     echo "assert_failure: expected non-zero exit, got 0" >&2
     echo "output: $output" >&2
     return 1
   fi
+}
+
+assert_exit_code() {
+  local expected="$1"
+  [[ "$status" -eq "$expected" ]] || {
+    echo "assert_exit_code: expected exit code $expected, got $status" >&2
+    echo "output: $output" >&2
+    return 1
+  }
 }
 
 assert_owned_by() {
