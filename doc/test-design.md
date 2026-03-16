@@ -78,13 +78,19 @@ Add custom assertions to `test/suite/assertions.bash`.
 - Files in between (02–98) test individual pen commands, each independent.
 - No reliance on `setup_suite` for assertions — bats only supports assertions inside `@test` blocks.
 
+**Per-test isolation model**: Each test method gets its own unique project directory (`${BATS_TEST_TMPDIR}/test-project`). Since sandbox identity is derived from the project path (container name, network, pf anchor, image, config dir), unique project dirs mean fully namespaced resources with no cross-test interference. This is a prerequisite for parallel execution with `bats --jobs`.
+
+**Name derivation helpers** (`test_sandbox_name`, `test_container_name`, etc.) in `test_helper.bash` duplicate production naming logic intentionally — tests should not depend on production code. Contract tests in `02_naming.bats` verify these stay in sync with pen's actual resource names.
+
 **Setup helpers** layer preconditions declaratively in each file's `setup()`:
-- `ensure_test_isolation` — tears down all pen resources by prefix and recreates the project directory. Every test file calls this.
+- `ensure_test_isolation` — creates a unique project directory and does precautionary cleanup of stale resources for this test's project path. Every test file calls this.
 - `ensure_pen_installed` — verifies pen is on PATH. A guard so failures are clear if `setup_suite` didn't run.
 - `ensure_pen_project_initialised` — calls `ensure_pen_installed`, then runs `pen init`. Used by files that need an initialized project (e.g. build tests). Files that test `pen init` itself call `ensure_pen_installed` directly.
 - `ensure_pen_project_built` — calls `ensure_pen_project_initialised`, then runs `pen build`. Used by files that need a built sandbox (e.g. exec tests).
 
 Each higher-level helper calls its prerequisite, so `setup()` only needs a single `ensure_*` call (plus `ensure_test_isolation`).
+
+**Teardown**: Every test file (except `01_install.bats` and `99_uninstall.bats`) defines `teardown()` calling `cleanup_test_resources`, which tears down resources for this test's project dir using test helper name functions. `teardown_suite` in `setup_suite.bash` provides a safety-net prefix-based sweep for resources leaked by crashed tests.
 
 ## Bats gotchas
 

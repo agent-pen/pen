@@ -7,6 +7,10 @@ setup() {
   ensure_pen_project_built
 }
 
+teardown() {
+  cleanup_test_resources
+}
+
 @test "pen exec runs command inside the container" {
   expect_success pen exec uname
   assert_output_contains "Linux"

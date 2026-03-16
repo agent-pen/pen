@@ -5,11 +5,8 @@ setup() {
   ensure_pen_installed
 }
 
-sandbox_config_dir() {
-  local project_name
-  project_name="$(basename "$(project_dir)")"
-  local matches=("$HOME"/.pen/sandboxes/*"$project_name"*)
-  echo "${matches[0]}"
+teardown() {
+  cleanup_test_resources
 }
 
 @test "pen init creates project runtime directory" {

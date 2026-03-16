@@ -5,6 +5,10 @@ setup() {
   ensure_pen_project_initialised
 }
 
+teardown() {
+  cleanup_test_resources
+}
+
 @test "pen build creates a sandbox that pen exec can use" {
   expect_failure pen exec true
 

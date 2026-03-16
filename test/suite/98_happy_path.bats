@@ -5,6 +5,10 @@ setup() {
   ensure_pen_installed
 }
 
+teardown() {
+  cleanup_test_resources
+}
+
 @test "happy path: build, exec, stop" {
   pen init
   expect_success pen build
