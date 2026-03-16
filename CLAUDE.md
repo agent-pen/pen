@@ -6,7 +6,13 @@ See `README.md` for an overview of pen, prerequisites, installation, and usage. 
 
 ## Testing
 
-See `doc/test-design.md` for test design principles and `doc/testing-strategy.md` for test infrastructure. Run the full e2e suite with `./test.sh`.
+See `doc/test-design.md` for test design principles and `doc/testing-strategy.md` for test infrastructure.
+
+```bash
+./test.sh                              # full e2e suite
+./test.sh 03_build.bats                # single file
+./test.sh 03_build.bats "builds image" # single file, single test (regex filter on test name)
+```
 
 A pre-commit hook runs the full test suite on every commit.
 
