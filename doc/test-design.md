@@ -89,7 +89,7 @@ Add custom assertions to `test/suite/assertions.bash`.
 **Name derivation helpers** (`test_sandbox_name`, `test_container_name`, etc.) in `test_helper.bash` duplicate production naming logic intentionally — tests should not depend on production code. `setup_suite` verifies these stay in sync with pen's actual resource names by creating a temporary sandbox and asserting all resource names match — if naming is out of sync, the suite aborts before any tests run.
 
 **Setup helpers** layer preconditions declaratively in each file's `setup()`:
-- `ensure_test_isolation` — creates a unique project directory and does precautionary cleanup of stale resources for this test's project path. Every test file calls this.
+- `ensure_test_isolation` — creates a unique project directory for this test method. No precautionary cleanup needed because `BATS_TEST_TMPDIR` is unique per run (see ADR 0044). Every test file calls this.
 - `ensure_pen_installed` — verifies pen is on PATH. A guard so failures are clear if `setup_suite` didn't run.
 - `ensure_pen_project_initialised` — calls `ensure_pen_installed`, then runs `pen init`. Used by files that need an initialized project (e.g. build tests). Files that test `pen init` itself call `ensure_pen_installed` directly.
 - `ensure_pen_project_built` — calls `ensure_pen_project_initialised`, then runs `pen build`. Used by files that need a built sandbox (e.g. exec tests).
