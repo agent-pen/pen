@@ -4,9 +4,9 @@ Date: 2026-03-15
 
 ## Status
 
-Accepted
-
 Supercedes [37. Per-file test isolation with independent project directories](0037-per-file-test-isolation-with-independent-project-directories.md)
+
+Superceded by [39. Per-test-method isolation via unique project directories](0039-per-test-method-isolation-via-unique-project-directories.md)
 
 ## Context
 
