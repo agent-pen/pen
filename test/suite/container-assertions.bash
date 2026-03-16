@@ -37,42 +37,6 @@ assert_image_exists() {
   }
 }
 
-assert_container_not_exists() {
-  local name="$1"
-  local json
-  json="$(container list --format json 2>/dev/null)"
-  local match
-  match="$(echo "$json" | jq -r "[.[] | select(.configuration.id == \"$name\")][0].configuration.id")"
-  [[ "$match" == "null" || -z "$match" ]] || {
-    echo "assert_container_not_exists: container exists: $name" >&2
-    return 1
-  }
-}
-
-assert_network_not_exists() {
-  local name="$1"
-  local json
-  json="$(container network list --format json 2>/dev/null)"
-  local match
-  match="$(echo "$json" | jq -r "[.[] | select(.id == \"$name\")][0].id")"
-  [[ "$match" == "null" || -z "$match" ]] || {
-    echo "assert_network_not_exists: network exists: $name" >&2
-    return 1
-  }
-}
-
-assert_image_not_exists() {
-  local name="$1"
-  local json
-  json="$(container image list --format json 2>/dev/null)"
-  local match
-  match="$(echo "$json" | jq -r "[.[] | select(.reference == \"$name\")][0].reference")"
-  [[ "$match" == "null" || -z "$match" ]] || {
-    echo "assert_image_not_exists: image exists: $name" >&2
-    return 1
-  }
-}
-
 assert_pf_anchor_not_exists() {
   local anchor="$1"
   if sudo "$PEN_REPO/test/suite/pf-anchor.sh" read "$anchor" 2>/dev/null; then
