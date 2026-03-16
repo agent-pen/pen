@@ -1,2 +1,2 @@
 brew "bats-core"
-brew "parallel"
+brew "parallel" # required by bats --jobs
