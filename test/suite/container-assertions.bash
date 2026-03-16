@@ -75,7 +75,7 @@ assert_image_not_exists() {
 
 assert_pf_anchor_not_exists() {
   local anchor="$1"
-  if sudo "$PEN_REPO/test/suite/check-pf-anchor.sh" "$anchor" 2>/dev/null; then
+  if sudo "$PEN_REPO/test/suite/pf-anchor.sh" read "$anchor" 2>/dev/null; then
     echo "assert_pf_anchor_not_exists: anchor has rules: $anchor" >&2
     return 1
   fi
@@ -83,7 +83,7 @@ assert_pf_anchor_not_exists() {
 
 assert_pf_anchor_exists() {
   local anchor="$1"
-  sudo "$PEN_REPO/test/suite/check-pf-anchor.sh" "$anchor" || {
+  sudo "$PEN_REPO/test/suite/pf-anchor.sh" read "$anchor" || {
     echo "assert_pf_anchor_exists: anchor has no rules: $anchor" >&2
     return 1
   }

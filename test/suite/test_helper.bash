@@ -61,7 +61,7 @@ cleanup_sandbox() {
 
   local anchor
   anchor="$(test_pf_anchor "$dir")"
-  sudo "$PEN_REPO/penctl/commands/lib/pfctl-wrapper.sh" flush "$anchor" 2>/dev/null || true
+  sudo "$PEN_REPO/test/suite/pf-anchor.sh" flush "$anchor" 2>/dev/null || true
 
   local network
   network="$(test_network_name "$dir")"
@@ -107,8 +107,7 @@ pen_sudoers_scripts() {
     | sed 's/.*NOPASSWD: //' \
     | grep -v '/install\.sh$' \
     | grep -v '/uninstall\.sh$' \
-    | grep -v '/clear-pf-anchors\.sh$' \
-    | grep -v '/check-pf-anchor\.sh$'
+    | grep -v '/pf-anchor\.sh$'
 }
 
 SUITE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
