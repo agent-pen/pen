@@ -73,6 +73,7 @@ Privileged test scripts use multiple layers of protection:
 
 ## Known issues
 
+- **No parallel test runs** — `./test.sh` creates and tears down a shared test user account. Running multiple instances concurrently causes races (e.g. container-not-found errors). Always wait for one run to finish before starting another.
 - **Cloudflare WARP conflicts with container DNS** — disable WARP before running tests
 - **Launchd domains survive user deletion** — `delete-test-account.sh` runs `launchctl bootout user/<uid>` after deletion to clean up orphaned domains
 - **Changing the test username requires a reboot** — the container apiserver caches per-UID state in memory
