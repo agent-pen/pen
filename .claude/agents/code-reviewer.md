@@ -54,7 +54,7 @@ A retrofitted test is a new `@test` block in a `.bats` file where the production
 
 For new/modified `.bats` test files in the commit:
 
-1. **Baseline check:** Run `./test.sh`. If tests fail, report that and skip mutation testing entirely.
+1. **Baseline check:** Run `./test.sh`. **Never run `./test.sh` more than once at a time** — parallel runs collide on the shared test user account and produce spurious failures. If tests fail, report that and skip mutation testing entirely.
 2. **Apply mutations one at a time** to the production code under test:
    - Boundary: `<` to `<=`, `-eq` to `-ne`
    - Operator: `&&` to `||`, `-d` to `-f`
