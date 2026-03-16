@@ -65,6 +65,10 @@ verify_naming_contract() {
 
   cd "$HOME"
   cleanup_sandbox "$verify_dir"
+
+  # Verify flush actually cleared the anchor.
+  assert_pf_anchor_not_exists "$anchor"
+
   rm -rf "$verify_dir"
 }
 

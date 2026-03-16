@@ -31,7 +31,7 @@ case "${1:-}" in
       validate_anchor "$2"
       pfctl -a "$2" -F all 2>/dev/null || true
     else
-      local short_prefix="pen-user-${uid}-project-"
+      short_prefix="pen-user-${uid}-project-"
       pfctl -a 'com.apple' -s Anchors 2>/dev/null \
         | grep "^${short_prefix}" \
         | while IFS= read -r name; do
