@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Test wrapper: setup → run → teardown.
-# Usage: ./test.sh
+# Usage: ./test.sh [file.bats] [test-name-filter]
 
 set -o nounset -o errexit -o pipefail
 
@@ -34,4 +34,4 @@ acquire_lock
 trap cleanup EXIT
 
 "$SCRIPT_DIR/test/setup.sh" "$TEST_USER"
-sudo "$SCRIPT_DIR/test/libs/privileged/run-test-suite.sh" "$TEST_USER"
+sudo "$SCRIPT_DIR/test/libs/privileged/run-test-suite.sh" "$TEST_USER" "${1:-}" "${2:-}"
