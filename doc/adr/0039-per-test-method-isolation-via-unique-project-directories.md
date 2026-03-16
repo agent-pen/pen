@@ -31,5 +31,5 @@ pf anchors are flushed in both setup and teardown. Bridge interfaces and IPs can
 ## Consequences
 
 - Tests are fully independent — safe for `bats --jobs`.
-- Each test that builds gets its own image. Acceptable cost at current suite size; a shared pre-built image is a future optimization.
+- Each test that builds gets its own image. BuildKit's content-addressed layer cache makes this fast — all layers hit cache since the Dockerfile is `FROM pen-test-minimal` (ADR 0036).
 - `BATS_TEST_TMPDIR` changes on every run (random component), so stale resources from a previous serial run won't be found by the precautionary cleanup. This is fine — the safety-net sweep in `teardown_suite` catches those.

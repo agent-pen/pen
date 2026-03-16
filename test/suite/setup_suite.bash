@@ -54,12 +54,8 @@ verify_naming_contract() {
   assert_pf_anchor_exists "$anchor"
   assert_directory_exists "$config_dir"
 
-  # Persist image ref so tests can reuse it via tagging instead of rebuilding.
-  echo "$image_ref" > /tmp/pen-test-prebuilt-image
-
-  # Clean up everything except the image — tests will reuse it.
   cd "$HOME"
-  cleanup_sandbox "$verify_dir" --keep-image
+  cleanup_sandbox "$verify_dir"
 
   # Verify flush actually cleared the anchor.
   assert_pf_anchor_not_exists "$anchor"
@@ -111,6 +107,4 @@ teardown_suite() {
   for config_dir in "$HOME"/.pen/sandboxes/${prefix}*; do
     [[ -d "$config_dir" ]] && rm -rf "$config_dir" || true
   done
-
-  rm -f /tmp/pen-test-prebuilt-image
 }

@@ -4,7 +4,7 @@ Date: 2026-03-16
 
 ## Status
 
-Accepted
+Superceded by [45. Remove image pre-tagging — BuildKit layer cache makes it redundant](0045-remove-image-pre-tagging-buildkit-layer-cache-makes-it-redundant.md)
 
 ## Context
 

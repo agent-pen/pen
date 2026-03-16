@@ -91,7 +91,7 @@ Add custom assertions to `test/suite/assertions.bash`.
 **Setup helpers** layer preconditions declaratively in each file's `setup()`:
 - `ensure_test_isolation` — creates a unique project directory for this test method. No precautionary cleanup needed because `BATS_TEST_TMPDIR` is unique per run (see ADR 0044). Every test file calls this.
 - `ensure_pen_installed` — verifies pen is on PATH. A guard so failures are clear if `setup_suite` didn't run.
-- `ensure_pen_project_initialised` — calls `ensure_pen_installed`, then runs `pen init`. Used by files that need an initialized project (e.g. build tests). Files that test `pen init` itself call `ensure_pen_installed` directly.
+- `ensure_pen_project_initialised` — calls `ensure_pen_installed`, then runs `pen init`. Used by files that need an initialized project (e.g. build, exec tests). Files that test `pen init` itself call `ensure_pen_installed` directly.
 - `ensure_pen_project_built` — calls `ensure_pen_project_initialised`, then runs `pen build`. Used by files that need a built sandbox (e.g. exec tests).
 
 Each higher-level helper calls its prerequisite, so `setup()` only needs a single `ensure_*` call (plus `ensure_test_isolation`).
