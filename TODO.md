@@ -21,7 +21,7 @@
 | 6 | SSH config setup should append, not clobber | `pen start` SSH config setup should append the ProxyCommand directive instead of clobbering `~/.ssh/config` inside the container. Merge the `Host *` ProxyCommand block if file already exists | Config destruction: clobbering may silently remove security-relevant SSH settings |
 | 7 | Investigate Apple Container DNS vs CloudFlare WARP conflict | Previously both tried to bind to port 53, blocking each other. If resolved, document what fixed it | |
 | 8 | Open SSH from host to sandbox | Support connecting IDE GUI on host to IDE server running in the sandbox | |
-| 9 | Fail `start.sh` if proxy cannot start | Detect proxy startup failure (e.g. port collision) and fail `start.sh` early instead of continuing with a broken proxy | |
+| 9 | Fail `start.sh` if proxy cannot start | Detect proxy startup failure (e.g. port collision) and fail `start.sh` early instead of continuing with a broken proxy. The `nc -z` readiness poll has no timeout — hangs indefinitely if the proxy never starts | |
 | 10 | Avoid proxy log growing indefinitely | Drop old log lines to prevent unbounded growth of the proxy log file | Host DoS: agent can generate traffic to fill host disk |
 | 11 | Improve blocked-request response from HTTP proxy | Return a more appropriate response body and status code when the HTTP proxy blocks a request | |
 | 12 | Show TCP/UDP activity in `pen proxy logs` | Currently only shows HTTP proxy activity. Investigate tunnelling all traffic via HTTP proxy using HTTP CONNECT so TCP/UDP activity is also visible | |
@@ -64,7 +64,6 @@
 | 2 | Run e2e tests in CI | Self-hosted macOS runner (Apple Silicon, Tahoe 26.x+). See `doc/testing-strategy.md` | |
 | 3 | Verify `--enable-kernel-install` downloads without prompting in CI | CI won't have a pre-copied kernel, so `ensure_container_system` will trigger the ~450MB download. Verify this completes non-interactively | |
 | 5 | Atomic sudoers write in `add-test-sudoers.sh` | Write sudoers to a temp file, validate with `visudo -cf`, then `mv` into place. Currently writes directly then validates, leaving a malformed file on disk if validation fails | |
-| 7 | Add lockfile to prevent concurrent test runs | Two simultaneous `test.sh` runs race on creating/deleting `pen-test-user`, which can corrupt each other's state or delete a user mid-test | |
 | 8 | Force-clean sandbox resources in test teardown | Test teardown (`delete-test-user.sh`) hangs if a sandbox is still running when the test user is deleted. Teardown should force-stop containers and clean up pf/proxy/network before deleting the account |
 | 9 | Use `cp -RP` in `copy-pen-source.sh` | `cp -R` follows symlinks. A symlink in the working tree pointing to a sensitive file would be copied as a regular file readable by the test user. `cp -RP` preserves symlinks as symlinks | |
 | 10 | Investigate `chmod u-w` on root-owned privileged scripts | Claude Code's Edit tool bypasses filesystem permissions to write to `root:wheel` files. Test whether removing owner write (`chmod u-w`) blocks this. If so, `develop.sh` should set `r-xr-xr-x` on privileged scripts instead of `rwxr-xr-x` | Agent can modify privileged scripts despite root ownership |
