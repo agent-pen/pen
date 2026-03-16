@@ -50,22 +50,24 @@ ensure_pen_project_built() {
 cleanup_test_resources() {
   local dir
   dir="$(project_dir)"
+
   local target
   target="$(test_container_name "$dir")"
-  local network
-  network="$(test_network_name "$dir")"
-  local anchor
-  anchor="$(test_pf_anchor "$dir")"
-  local proxy_pid_file="${dir}/.pen/proxy.pid"
-
   container delete --force "$target" 2>/dev/null || true
 
+  local proxy_pid_file="${dir}/.pen/proxy.pid"
   if [[ -f "$proxy_pid_file" ]]; then
     kill "$(cat "$proxy_pid_file")" 2>/dev/null || true
   fi
 
+  local anchor
+  anchor="$(test_pf_anchor "$dir")"
   sudo "$HOME/pen-source/penctl/commands/lib/pfctl-wrapper.sh" flush "$anchor" 2>/dev/null || true
+
+  local network
+  network="$(test_network_name "$dir")"
   container network delete "$network" 2>/dev/null || true
+
   container image delete --force "$(test_sandbox_name "$dir")" 2>/dev/null || true
   rm -rf "$(test_sandbox_config_dir "$dir")" 2>/dev/null || true
 }
