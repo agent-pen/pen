@@ -40,7 +40,7 @@ assert_image_exists() {
 assert_container_not_exists() {
   local name="$1"
   local json
-  json="$(container list --format json 2>/dev/null)" || return 0
+  json="$(container list --format json 2>/dev/null)"
   local match
   match="$(echo "$json" | jq -r "[.[] | select(.configuration.id == \"$name\")][0].configuration.id")"
   [[ "$match" == "null" || -z "$match" ]] || {
@@ -52,7 +52,7 @@ assert_container_not_exists() {
 assert_network_not_exists() {
   local name="$1"
   local json
-  json="$(container network list --format json 2>/dev/null)" || return 0
+  json="$(container network list --format json 2>/dev/null)"
   local match
   match="$(echo "$json" | jq -r "[.[] | select(.id == \"$name\")][0].id")"
   [[ "$match" == "null" || -z "$match" ]] || {
@@ -64,7 +64,7 @@ assert_network_not_exists() {
 assert_image_not_exists() {
   local name="$1"
   local json
-  json="$(container image list --format json 2>/dev/null)" || return 0
+  json="$(container image list --format json 2>/dev/null)"
   local match
   match="$(echo "$json" | jq -r "[.[] | select(.reference == \"$name\")][0].reference")"
   [[ "$match" == "null" || -z "$match" ]] || {

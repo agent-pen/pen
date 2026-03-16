@@ -25,6 +25,13 @@ verify_naming_contract() {
   local config_dir
   config_dir="$(test_sandbox_config_dir "$verify_dir")"
 
+  # Ensure the container system is running so that list commands work.
+  # Without this, "not exists" assertions pass trivially because the
+  # commands fail (|| return 0) rather than returning empty results.
+  if ! container system status &>/dev/null; then
+    container system start --enable-kernel-install
+  fi
+
   # Assert none of these resources exist yet — proves the names are
   # specific to this project dir, not coincidentally matching something
   # already present.
@@ -46,6 +53,15 @@ verify_naming_contract() {
   assert_image_exists "$image_ref"
   assert_pf_anchor_exists "$anchor"
   assert_directory_exists "$config_dir"
+
+  # Verify "not exists" assertions detect actually-existing resources.
+  # Without this, the pre-creation checks above can't be mutation-tested
+  # (mktemp guarantees unique names, so they'd pass even if broken).
+  assert_would_fail assert_container_not_exists "$container_name"
+  assert_would_fail assert_network_not_exists "$network_name"
+  assert_would_fail assert_image_not_exists "$image_ref"
+  assert_would_fail assert_pf_anchor_not_exists "$anchor"
+  assert_would_fail assert_directory_not_exists "$config_dir"
 
   cd "$HOME"
   cleanup_sandbox "$verify_dir"

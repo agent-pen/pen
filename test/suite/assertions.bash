@@ -147,6 +147,13 @@ assert_line_count() {
   }
 }
 
+assert_would_fail() {
+  if "$@" 2>/dev/null; then
+    echo "assert_would_fail: expected failure from: $*" >&2
+    return 1
+  fi
+}
+
 assert_glob_match() {
   local pattern="$1" value="$2"
   # shellcheck disable=SC2254
