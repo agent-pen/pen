@@ -40,6 +40,11 @@ delete_account() {
 
   # Requires the terminal app to have Full Disk Access — see develop.sh.
   sysadminctl -deleteUser "$TARGET" 2>&1 || true
+
+  if id "$TARGET" &>/dev/null; then
+    echo "FATAL: sysadminctl -deleteUser failed — user '$TARGET' still exists" >&2
+    return 1
+  fi
 }
 
 # Sweep orphaned launchd domain. Must run after account deletion — if run

@@ -23,6 +23,11 @@ create_account() {
     -password "$password" \
     -home "/Users/$TEST_USER" >&2 || true
 
+  if ! id "$TEST_USER" &>/dev/null; then
+    echo "FATAL: sysadminctl -addUser failed — user '$TEST_USER' does not exist" >&2
+    return 1
+  fi
+
   # sysadminctl -createHomeDirectory is broken — use createhomedir instead.
   createhomedir -c -u "$TEST_USER" >&2
 }
