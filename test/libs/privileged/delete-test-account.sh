@@ -22,9 +22,10 @@ TARGET_UID="$(resolve_target_uid "$TARGET")"
 readonly TARGET_UID
 
 flush_pf_anchors() {
-  pfctl -a com.apple -s Anchors 2>/dev/null | grep "^ *com.apple/pen-user-${TARGET_UID}-project-" | while read -r anchor; do
-    pfctl -a "$anchor" -F all 2>/dev/null || true
-  done || true
+  pfctl -a com.apple -s Anchors 2>/dev/null \
+    | grep -o "com.apple/pen-user-${TARGET_UID}-project-[^ ]*" \
+    | xargs -P 0 -I{} pfctl -a {} -F all 2>/dev/null \
+    || true
 }
 
 force_kill_processes() {
