@@ -93,9 +93,19 @@ teardown_suite() {
         container image delete --force "$ref" 2>/dev/null || true
       done || true
 
-  # Kill mitmdump processes and wait for them to exit
-  pkill -f mitmdump 2>/dev/null || true
-  while pgrep -f mitmdump > /dev/null 2>&1; do
+  # Kill test user's mitmdump processes and wait for them to exit.
+  # Scope to current user (-U) so we don't kill other users' proxies.
+  local uid
+  uid="$(id -u)"
+  pkill -f -U "$uid" mitmdump 2>/dev/null || true
+  local max_attempts=100
+  local attempts=0
+  while pgrep -f -U "$uid" mitmdump > /dev/null 2>&1; do
+    attempts=$((attempts + 1))
+    if [[ "$attempts" -ge "$max_attempts" ]]; then
+      echo "FATAL: mitmdump still running after $max_attempts attempts" >&2
+      return 1
+    fi
     sleep 0.1
   done
 
