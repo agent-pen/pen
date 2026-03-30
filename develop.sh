@@ -82,5 +82,11 @@ fi
 if [[ "$UNDO" == "--undo" ]]; then
   echo "Dev setup undone."
 else
+  echo ""
   echo "Dev setup complete."
+  echo ""
+  echo "Manual step required:"
+  echo "  Grant your terminal app Full Disk Access in"
+  echo "  System Settings > Privacy & Security > Full Disk Access."
+  echo "  Without this, sysadminctl triggers a GUI dialog during tests."
 fi

@@ -37,6 +37,8 @@ delete_account() {
   # Ensure it exists and is owned by the user so sysadminctl deletes it.
   mkdir -p "/Users/$TARGET"
   chown "$TARGET" "/Users/$TARGET"
+
+  # Requires the terminal app to have Full Disk Access — see develop.sh.
   sysadminctl -deleteUser "$TARGET" 2>&1 || true
 }
 

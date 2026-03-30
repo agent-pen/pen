@@ -101,6 +101,8 @@ sudo ./develop.sh
 
 This installs dev dependencies, configures passwordless sudo for the test runner, and sets up git hooks. To remove: `sudo ./develop.sh --undo`.
 
+Grant your terminal app **Full Disk Access** in System Settings > Privacy & Security > Full Disk Access. Without this, `sysadminctl` triggers a GUI dialog during test user creation and deletion.
+
 Run end-to-end tests:
 
 ```bash

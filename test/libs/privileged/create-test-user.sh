@@ -17,12 +17,11 @@ create_account() {
   local password
   password="$(openssl rand -hex 16)"
 
-  # FDE (FileVault) warning is expected — suppressing it requires admin credentials
-  # which we don't have non-interactively. The test user doesn't need FDE.
+  # Requires the terminal app to have Full Disk Access — see develop.sh.
   sysadminctl -addUser "$TEST_USER" \
     -fullName "pen test user" \
     -password "$password" \
-    -home "/Users/$TEST_USER" >&2
+    -home "/Users/$TEST_USER" >&2 || true
 
   # sysadminctl -createHomeDirectory is broken — use createhomedir instead.
   createhomedir -c -u "$TEST_USER" >&2
