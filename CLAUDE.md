@@ -14,7 +14,7 @@ See `doc/test-design.md` for test design principles and `doc/testing-strategy.md
 ./test.sh 03_build.bats "builds image" # single file, single test (regex filter on test name)
 ```
 
-A pre-commit hook runs the full test suite on every commit.
+A pre-commit hook runs the full test suite on every commit. Do not run `./test.sh` (full suite) manually before committing — the hook handles it. Only run targeted tests (`./test.sh file.bats "filter"`) during development.
 
 **Never remove test coverage without user confirmation.** Production code changes — even ones that appear to invalidate a test — may be temporary spikes. Tests are load-bearing; removing them should be a deliberate decision, not a side effect.
 

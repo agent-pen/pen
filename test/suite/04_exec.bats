@@ -37,13 +37,6 @@ teardown() {
   expect_success pen exec test -f /tmp/pen-test-marker
 }
 
-@test "pen exec recovers after the container is killed" {
-  pen exec true
-  container delete --force "$(test_container_name "$(project_dir)")"
-  expect_success pen exec whoami
-  assert_output_contains "root"
-}
-
 @test "pen exec recovers after all sandbox processes die" {
   pen exec true
   container delete --force "$(test_container_name "$(project_dir)")"
