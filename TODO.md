@@ -67,7 +67,6 @@
 | 10 | Investigate `chmod u-w` on root-owned privileged scripts | Claude Code's Edit tool bypasses filesystem permissions to write to `root:wheel` files. Test whether removing owner write (`chmod u-w`) blocks this. If so, `develop.sh` should set `r-xr-xr-x` on privileged scripts instead of `rwxr-xr-x` | Agent can modify privileged scripts despite root ownership |
 | 12 | Sanitize pfctl anchor suffix in `pfctl-wrapper.sh` | Anchor name is only prefix-checked. Add a character class validation (e.g. `[a-zA-Z0-9._-]`) to prevent unexpected characters reaching `pfctl -a` | Privilege escalation: unconstrained suffix passed to root-executed pfctl |
 | 17 | Ctrl+C should kill hung tests | SIGINT from Ctrl+C doesn't propagate through the `sudo`/user-transition boundary to the test user's processes. A hung test (e.g. infinite poll loop) requires manual `sudo kill -9` to stop. Need to propagate signals or add a cleanup trap in `test.sh` that kills the test user's process tree | |
-| 18 | Faster image builds in tests | Investigate skipping `pen build` when the image already exists and inputs haven't changed, or sharing the host user's BuildKit cache with the test user. Currently every test run rebuilds via BuildKit layer cache, which is fast but not free | |
 | 19 | Time-based poll timeouts | Polling loops use iteration counts for timeouts, which conflate poll frequency with timeout duration. Use `$SECONDS` or `date +%s` for time-based conditions so the timeout is independent of sleep interval | |
 
 ## Dependencies
