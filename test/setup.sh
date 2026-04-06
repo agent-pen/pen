@@ -9,8 +9,10 @@ TEST_USER="${1:?Usage: test/setup.sh <username>}"
 
 "$SCRIPT_DIR/teardown.sh" "$TEST_USER"
 
-echo "Creating test user..."
-sudo "$SCRIPT_DIR/libs/privileged/create-test-user.sh" "$TEST_USER"
+if ! id "$TEST_USER" &>/dev/null; then
+  echo "Creating test user..."
+  sudo "$SCRIPT_DIR/libs/privileged/create-test-user.sh" "$TEST_USER"
+fi
 
 echo "Configuring test environment..."
 "$SCRIPT_DIR/libs/configure-test-env.sh" "$TEST_USER"
