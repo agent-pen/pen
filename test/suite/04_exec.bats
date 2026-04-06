@@ -16,7 +16,7 @@ teardown() {
   assert_output_contains "Linux"
 }
 
-@test "pen exec runs command in project-specific container" {
+@test "pen exec mounts the project directory at the same path as on the host" {
   echo "pen-test-content" > "$(project_dir)/marker"
   expect_success pen exec cat "$(project_dir)/marker"
   assert_output_contains "pen-test-content"
@@ -35,4 +35,26 @@ teardown() {
 @test "pen exec reuses running sandbox on subsequent calls" {
   pen exec touch /tmp/pen-test-marker
   expect_success pen exec test -f /tmp/pen-test-marker
+}
+
+@test "pen exec recovers after the container is killed" {
+  pen exec true
+  container delete --force "$(test_container_name "$(project_dir)")"
+  expect_success pen exec whoami
+  assert_output_contains "root"
+}
+
+@test "pen exec recovers after all sandbox processes die" {
+  pen exec true
+  container delete --force "$(test_container_name "$(project_dir)")"
+  kill "$(cat "$(project_dir)/.pen/proxy.pid")"
+  expect_success pen exec whoami
+  assert_output_contains "root"
+}
+
+@test "pen exec fails if image has not been built" {
+  container image delete --force "$(test_sandbox_name "$(project_dir)")"
+  run --separate-stderr pen exec whoami
+  assert_failure
+  assert_stderr_contains "pen build"
 }
