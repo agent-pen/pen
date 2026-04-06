@@ -24,13 +24,12 @@ readonly TARGET SUDO_USER_HOME CONTAINER_BASE SRC DST
 mkdir -p "$DST"
 
 if [[ -f "$SRC/state.json" ]]; then
-  cp "$SRC/state.json" "$DST/state.json"
+  rsync -a "$SRC/state.json" "$DST/state.json"
 fi
 
 for subdir in kernels content; do
   if [[ -d "$SRC/$subdir" ]]; then
-    mkdir -p "$DST/$subdir"
-    cp -R "$SRC/$subdir"/* "$DST/$subdir"/
+    rsync -a --delete "$SRC/$subdir/" "$DST/$subdir/"
     find "$DST/$subdir" -type l | while read -r link; do
       local_target="$(readlink "$link")"
       if [[ "$local_target" == "$SUDO_USER_HOME"* ]]; then
