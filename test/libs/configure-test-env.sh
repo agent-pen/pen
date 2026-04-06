@@ -8,7 +8,6 @@ set -o nounset -o errexit -o pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TEST_USER="${1:?Usage: configure-test-env.sh <username>}"
 
-sudo "$SCRIPT_DIR/privileged/copy-container-data.sh" "$TEST_USER"
 sudo "$SCRIPT_DIR/privileged/copy-pen-source.sh" "$TEST_USER"
 sudo "$SCRIPT_DIR/privileged/grant-test-privileges.sh" "$TEST_USER"
 

@@ -13,7 +13,6 @@ if ! id "$TEST_USER" &>/dev/null; then
 fi
 
 sudo "$SCRIPT_DIR/libs/privileged/remove-test-sudoers.sh" "$TEST_USER"
-sudo "$SCRIPT_DIR/libs/privileged/clean-test-user-processes.sh" "$TEST_USER"
 
 if [[ "${PEN_TEST_FRESH_USER:-}" == "1" ]]; then
   sudo "$SCRIPT_DIR/libs/privileged/delete-test-account.sh" "$TEST_USER"

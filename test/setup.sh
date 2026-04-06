@@ -12,6 +12,7 @@ TEST_USER="${1:?Usage: test/setup.sh <username>}"
 if ! id "$TEST_USER" &>/dev/null; then
   echo "Creating test user..."
   sudo "$SCRIPT_DIR/libs/privileged/create-test-user.sh" "$TEST_USER"
+  sudo "$SCRIPT_DIR/libs/privileged/copy-container-data.sh" "$TEST_USER"
 fi
 
 echo "Configuring test environment..."

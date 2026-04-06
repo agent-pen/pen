@@ -119,9 +119,6 @@ teardown_suite() {
     [[ -d "$config_dir" ]] && rm -rf "$config_dir" || true
   done
 
-  # Stop the container system so the next run starts clean.
-  container system stop 2>/dev/null || true
-
   # Remove pen symlink without relying on production uninstall.sh.
   rm -f "$HOME/.local/bin/pen"
 }

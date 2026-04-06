@@ -21,7 +21,17 @@ ensure_correct_target_user_and_uid "$TARGET"
 TARGET_UID="$(resolve_target_uid "$TARGET")"
 readonly TARGET_UID
 
-"$SCRIPT_DIR/clean-test-user-processes.sh" "$TARGET"
+force_kill_processes() {
+  pkill -9 -u "$TARGET_UID" 2>/dev/null || true
+  sleep 1
+}
+
+flush_pf_anchors() {
+  pfctl -a com.apple -s Anchors 2>/dev/null \
+    | grep -o "com.apple/pen-user-${TARGET_UID}-project-[^ ]*" \
+    | xargs -P 0 -I{} pfctl -a {} -F all 2>/dev/null \
+    || true
+}
 
 delete_account() {
   # sysadminctl -deleteUser fails if the home directory is missing.
@@ -46,5 +56,7 @@ bootout_launchd_domain() {
   launchctl bootout "user/$TARGET_UID" 2>/dev/null || true
 }
 
+force_kill_processes
+flush_pf_anchors
 delete_account
 bootout_launchd_domain
