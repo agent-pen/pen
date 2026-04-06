@@ -15,6 +15,7 @@ PRIVILEGED_DIR="${PEN_HOME}/test/libs/privileged"
 # target-user-guards.sh is excluded: it's a library sourced by these scripts,
 # not a command, so it needs root ownership (below) but not a sudoers entry.
 PRIVILEGED_SCRIPTS=(
+  "${PRIVILEGED_DIR}/clean-test-user-processes.sh"
   "${PRIVILEGED_DIR}/copy-container-data.sh"
   "${PRIVILEGED_DIR}/copy-pen-source.sh"
   "${PRIVILEGED_DIR}/create-test-user.sh"
