@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-# Test setup: create test user, configure environment.
-# Usage: test/setup.sh
+# Test setup: ensure clean state, create test user if needed, configure environment.
+# Usage: test/setup.sh <username>
 
 set -o nounset -o errexit -o pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TEST_USER="${1:?Usage: test/setup.sh <username>}"
 
-echo "Cleaning up any leftover test user..."
-"$SCRIPT_DIR/libs/delete-test-user.sh" "$TEST_USER"
+"$SCRIPT_DIR/teardown.sh" "$TEST_USER"
 
 echo "Creating test user..."
 sudo "$SCRIPT_DIR/libs/privileged/create-test-user.sh" "$TEST_USER"

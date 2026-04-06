@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/target-user-guards.sh"
 require_root
 
 TARGET="${1:?Usage: clean-test-user-processes.sh <username>}"
-ensure_correct_target_user "$TARGET"
+ensure_correct_target_user_and_uid "$TARGET"
 readonly TARGET
 
 if ! id "$TARGET" &>/dev/null; then
@@ -20,10 +20,17 @@ fi
 TARGET_UID="$(resolve_target_uid "$TARGET")"
 readonly TARGET_UID
 
-pkill -9 -u "$TARGET_UID" 2>/dev/null || true
-sleep 1
+force_kill_processes() {
+  pkill -9 -u "$TARGET_UID" 2>/dev/null || true
+  sleep 1
+}
 
-pfctl -a com.apple -s Anchors 2>/dev/null \
-  | grep -o "com.apple/pen-user-${TARGET_UID}-project-[^ ]*" \
-  | xargs -P 0 -I{} pfctl -a {} -F all 2>/dev/null \
-  || true
+flush_pf_anchors() {
+  pfctl -a com.apple -s Anchors 2>/dev/null \
+    | grep -o "com.apple/pen-user-${TARGET_UID}-project-[^ ]*" \
+    | xargs -P 0 -I{} pfctl -a {} -F all 2>/dev/null \
+    || true
+}
+
+force_kill_processes
+flush_pf_anchors

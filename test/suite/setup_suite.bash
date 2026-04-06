@@ -1,6 +1,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/test_helper.bash"
 
 setup_suite() {
+  teardown_suite
   sudo "$PEN_REPO/install.sh"
   verify_naming_contract
 }
