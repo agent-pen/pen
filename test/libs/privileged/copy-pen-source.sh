@@ -18,7 +18,7 @@ DEST="/Users/$TARGET/pen-source"
 ensure_correct_target_path "$DEST"
 readonly TARGET SRC DEST
 
-cp -R "$SRC" "$DEST"
+rsync -a --delete "$SRC/" "$DEST/"
 
 # Replace the default Dockerfile with a single-line FROM pointing to the
 # pre-built test image. This avoids a slow full build during tests while
